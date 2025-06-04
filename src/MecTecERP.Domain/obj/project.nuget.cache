@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "VK0NEfgYo+M=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Rafael\\Desktop\\MecTecERP\\src\\MecTecERP.Domain\\MecTecERP.Domain.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Rafael\\.nuget\\packages\\fluentvalidation\\11.8.0\\fluentvalidation.11.8.0.nupkg.sha512",
+    "C:\\Users\\Rafael\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

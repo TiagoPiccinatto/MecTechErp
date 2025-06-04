@@ -1,0 +1,38 @@
+@inherits LayoutView
+@using Blazored.Toast.Configuration
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">MecTecERP</h4>
+                <div class="d-flex align-items-center">
+                    <span class="text-muted me-3">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+                    <button class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-user"></i> Usuário
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<BlazoredToasts Position="ToastPosition.TopRight" 
+                Timeout="5" 
+                IconType="IconType.FontAwesome" 
+                SuccessClass="success-toast" 
+                SuccessIcon="fas fa-check-circle" 
+                ErrorClass="error-toast" 
+                ErrorIcon="fas fa-exclamation-circle" 
+                InfoClass="info-toast" 
+                InfoIcon="fas fa-info-circle" 
+                WarningClass="warning-toast" 
+                WarningIcon="fas fa-exclamation-triangle" />

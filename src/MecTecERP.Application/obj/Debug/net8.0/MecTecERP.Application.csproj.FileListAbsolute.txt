@@ -1,0 +1,5 @@
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Application\obj\Debug\net8.0\MecTecERP.Application.csproj.AssemblyReference.cache
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Application\obj\Debug\net8.0\MecTecERP.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Application\obj\Debug\net8.0\MecTecERP.Application.AssemblyInfoInputs.cache
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Application\obj\Debug\net8.0\MecTecERP.Application.AssemblyInfo.cs
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Application\obj\Debug\net8.0\MecTecERP.Application.csproj.CoreCompileInputs.cache

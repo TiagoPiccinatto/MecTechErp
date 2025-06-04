@@ -1,0 +1,92 @@
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+            <i class="fas fa-cogs"></i> MecTecERP
+        </a>
+        <button title="Alternar navegação" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="CollapseNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Dashboard
+            </NavLink>
+        </div>
+        
+        <!-- Módulo Estoque -->
+        <div class="nav-item px-3">
+            <div class="nav-section-header">
+                <i class="fas fa-boxes"></i> ESTOQUE
+            </div>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="categorias">
+                <i class="fas fa-tags"></i> Categorias
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="fornecedores">
+                <i class="fas fa-truck"></i> Fornecedores
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="produtos">
+                <i class="fas fa-cube"></i> Produtos
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="movimentacoes">
+                <i class="fas fa-exchange-alt"></i> Movimentações
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="inventarios">
+                <i class="fas fa-clipboard-list"></i> Inventários
+            </NavLink>
+        </div>
+        
+        <!-- Relatórios -->
+        <div class="nav-item px-3">
+            <div class="nav-section-header">
+                <i class="fas fa-chart-bar"></i> RELATÓRIOS
+            </div>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="relatorios/estoque">
+                <i class="fas fa-file-alt"></i> Relatórios de Estoque
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="dashboard/estoque">
+                <i class="fas fa-tachometer-alt"></i> Dashboard Estoque
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void CollapseNavMenu()
+    {
+        collapseNavMenu = true;
+    }
+}

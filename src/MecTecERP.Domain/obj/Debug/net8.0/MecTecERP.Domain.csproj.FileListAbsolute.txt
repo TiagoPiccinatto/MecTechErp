@@ -1,0 +1,12 @@
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\MecTecERP.Domain.csproj.AssemblyReference.cache
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\MecTecERP.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\MecTecERP.Domain.AssemblyInfoInputs.cache
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\MecTecERP.Domain.AssemblyInfo.cs
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\MecTecERP.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\bin\Debug\net8.0\MecTecERP.Domain.deps.json
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\bin\Debug\net8.0\MecTecERP.Domain.dll
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\bin\Debug\net8.0\MecTecERP.Domain.pdb
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\MecTecERP.Domain.dll
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\refint\MecTecERP.Domain.dll
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\MecTecERP.Domain.pdb
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Domain\obj\Debug\net8.0\ref\MecTecERP.Domain.dll

@@ -1,0 +1,15 @@
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\MecTecERP.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\MecTecERP.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\MecTecERP.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\MecTecERP.Infrastructure.AssemblyInfo.cs
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\MecTecERP.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\bin\Debug\net8.0\MecTecERP.Infrastructure.deps.json
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\bin\Debug\net8.0\MecTecERP.Infrastructure.dll
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\bin\Debug\net8.0\MecTecERP.Infrastructure.pdb
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\bin\Debug\net8.0\MecTecERP.Domain.dll
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\bin\Debug\net8.0\MecTecERP.Domain.pdb
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\MecTecER.4206FB79.Up2Date
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\MecTecERP.Infrastructure.dll
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\refint\MecTecERP.Infrastructure.dll
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\MecTecERP.Infrastructure.pdb
+C:\Users\Rafael\Desktop\MecTecERP\src\MecTecERP.Infrastructure\obj\Debug\net8.0\ref\MecTecERP.Infrastructure.dll

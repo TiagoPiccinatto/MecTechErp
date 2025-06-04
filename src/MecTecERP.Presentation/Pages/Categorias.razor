@@ -1,0 +1,349 @@
+@page "/categorias"
+@inject ICategoriaService CategoriaService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Categorias - MecTecERP</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">
+                    <span class="oi oi-tags" aria-hidden="true"></span>
+                    Categorias
+                </h1>
+                <button class="btn btn-primary" @onclick="AbrirModalNova">
+                    <span class="oi oi-plus" aria-hidden="true"></span>
+                    Nova Categoria
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="filtroNome">Nome:</label>
+                <input type="text" id="filtroNome" class="form-control" @bind="filtroNome" @onkeypress="OnKeyPress" placeholder="Filtrar por nome..." />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="filtroAtivo">Status:</label>
+                <select id="filtroAtivo" class="form-control" @bind="filtroAtivo" @onchange="CarregarCategorias">
+                    <option value="">Todos</option>
+                    <option value="true">Ativo</option>
+                    <option value="false">Inativo</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <div>
+                    <button class="btn btn-secondary" @onclick="LimparFiltros">
+                        <span class="oi oi-reload" aria-hidden="true"></span>
+                        Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    @if (carregando)
+                    {
+                        <div class="text-center">
+                            <div class="loading"></div>
+                            <p>Carregando categorias...</p>
+                        </div>
+                    }
+                    else if (categorias?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Descrição</th>
+                                        <th>Status</th>
+                                        <th>Data Criação</th>
+                                        <th width="150">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var categoria in categorias)
+                                    {
+                                        <tr>
+                                            <td>@categoria.Nome</td>
+                                            <td>@categoria.Descricao</td>
+                                            <td>
+                                                <span class="badge @(categoria.Ativo ? "badge-success" : "badge-secondary")">
+                                                    @(categoria.Ativo ? "Ativo" : "Inativo")
+                                                </span>
+                                            </td>
+                                            <td>@categoria.DataCriacao.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => AbrirModalEdicao(categoria)">
+                                                    <span class="oi oi-pencil" aria-hidden="true"></span>
+                                                </button>
+                                                <button class="btn btn-sm @(categoria.Ativo ? "btn-outline-warning" : "btn-outline-success")" 
+                                                        @onclick="() => AlternarStatus(categoria)">
+                                                    <span class="oi @(categoria.Ativo ? "oi-ban" : "oi-check")" aria-hidden="true"></span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginação -->
+                        @if (totalPaginas > 1)
+                        {
+                            <nav>
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item @(paginaAtual == 1 ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => IrParaPagina(paginaAtual - 1)" disabled="@(paginaAtual == 1)">
+                                            Anterior
+                                        </button>
+                                    </li>
+                                    @for (int i = 1; i <= totalPaginas; i++)
+                                    {
+                                        var pagina = i;
+                                        <li class="page-item @(paginaAtual == pagina ? "active" : "")">
+                                            <button class="page-link" @onclick="() => IrParaPagina(pagina)">
+                                                @pagina
+                                            </button>
+                                        </li>
+                                    }
+                                    <li class="page-item @(paginaAtual == totalPaginas ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => IrParaPagina(paginaAtual + 1)" disabled="@(paginaAtual == totalPaginas)">
+                                            Próxima
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <span class="oi oi-info" aria-hidden="true"></span>
+                            <p>Nenhuma categoria encontrada.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Nova/Editar Categoria -->
+@if (exibirModal)
+{
+    <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(categoriaEdicao.Id == 0 ? "Nova Categoria" : "Editar Categoria")</h5>
+                    <button type="button" class="btn-close" @onclick="FecharModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="categoriaEdicao" OnValidSubmit="SalvarCategoria">
+                        <DataAnnotationsValidator />
+                        <div class="form-group mb-3">
+                            <label for="nome">Nome:</label>
+                            <InputText id="nome" class="form-control" @bind-Value="categoriaEdicao.Nome" />
+                            <ValidationMessage For="@(() => categoriaEdicao.Nome)" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="descricao">Descrição:</label>
+                            <InputTextArea id="descricao" class="form-control" @bind-Value="categoriaEdicao.Descricao" rows="3" />
+                            <ValidationMessage For="@(() => categoriaEdicao.Descricao)" />
+                        </div>
+                        <div class="form-check mb-3">
+                            <InputCheckbox id="ativo" class="form-check-input" @bind-Value="categoriaEdicao.Ativo" />
+                            <label class="form-check-label" for="ativo">
+                                Ativo
+                            </label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="FecharModal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" disabled="@salvando">
+                                @if (salvando)
+                                {
+                                    <span class="loading"></span>
+                                }
+                                Salvar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private IEnumerable<CategoriaDto>? categorias;
+    private bool carregando = true;
+    private bool exibirModal = false;
+    private bool salvando = false;
+    private CategoriaDto categoriaEdicao = new();
+    
+    // Filtros
+    private string filtroNome = string.Empty;
+    private string? filtroAtivo;
+    
+    // Paginação
+    private int paginaAtual = 1;
+    private int tamanhoPagina = 10;
+    private int totalRegistros = 0;
+    private int totalPaginas => (int)Math.Ceiling((double)totalRegistros / tamanhoPagina);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarCategorias();
+    }
+
+    private async Task CarregarCategorias()
+    {
+        try
+        {
+            carregando = true;
+            StateHasChanged();
+
+            bool? ativo = string.IsNullOrEmpty(filtroAtivo) ? null : bool.Parse(filtroAtivo);
+            
+            categorias = await CategoriaService.ObterPorFiltroAsync(
+                nome: string.IsNullOrEmpty(filtroNome) ? null : filtroNome,
+                ativo: ativo,
+                pagina: paginaAtual,
+                tamanhoPagina: tamanhoPagina
+            );
+            
+            totalRegistros = await CategoriaService.ContarPorFiltroAsync(
+                nome: string.IsNullOrEmpty(filtroNome) ? null : filtroNome,
+                ativo: ativo
+            );
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erro ao carregar categorias: {ex.Message}");
+        }
+        finally
+        {
+            carregando = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            paginaAtual = 1;
+            await CarregarCategorias();
+        }
+    }
+
+    private async Task LimparFiltros()
+    {
+        filtroNome = string.Empty;
+        filtroAtivo = null;
+        paginaAtual = 1;
+        await CarregarCategorias();
+    }
+
+    private async Task IrParaPagina(int pagina)
+    {
+        if (pagina >= 1 && pagina <= totalPaginas)
+        {
+            paginaAtual = pagina;
+            await CarregarCategorias();
+        }
+    }
+
+    private void AbrirModalNova()
+    {
+        categoriaEdicao = new CategoriaDto { Ativo = true };
+        exibirModal = true;
+    }
+
+    private void AbrirModalEdicao(CategoriaDto categoria)
+    {
+        categoriaEdicao = new CategoriaDto
+        {
+            Id = categoria.Id,
+            Nome = categoria.Nome,
+            Descricao = categoria.Descricao,
+            Ativo = categoria.Ativo
+        };
+        exibirModal = true;
+    }
+
+    private void FecharModal()
+    {
+        exibirModal = false;
+        categoriaEdicao = new();
+    }
+
+    private async Task SalvarCategoria()
+    {
+        try
+        {
+            salvando = true;
+            StateHasChanged();
+
+            if (categoriaEdicao.Id == 0)
+            {
+                await CategoriaService.CriarAsync(categoriaEdicao);
+            }
+            else
+            {
+                await CategoriaService.AtualizarAsync(categoriaEdicao);
+            }
+
+            FecharModal();
+            await CarregarCategorias();
+            await JSRuntime.InvokeVoidAsync("alert", "Categoria salva com sucesso!");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erro ao salvar categoria: {ex.Message}");
+        }
+        finally
+        {
+            salvando = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task AlternarStatus(CategoriaDto categoria)
+    {
+        try
+        {
+            if (categoria.Ativo)
+            {
+                await CategoriaService.DesativarAsync(categoria.Id);
+            }
+            else
+            {
+                await CategoriaService.AtivarAsync(categoria.Id);
+            }
+
+            await CarregarCategorias();
+            await JSRuntime.InvokeVoidAsync("alert", $"Status da categoria alterado com sucesso!");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erro ao alterar status: {ex.Message}");
+        }
+    }
+}

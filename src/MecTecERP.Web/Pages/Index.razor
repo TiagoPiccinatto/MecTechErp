@@ -1,0 +1,190 @@
+@page "/"
+@using Microsoft.AspNetCore.Components
+
+<PageTitle>Dashboard - MecTecERP</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </h1>
+            <p class="text-muted">Visão geral do sistema</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Cards de Resumo -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total de Produtos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-cube fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Valor Total do Estoque
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">R$ 0,00</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Produtos com Estoque Baixo
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Produtos Sem Estoque
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Ações Rápidas -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt"></i> Ações Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <a href="/produtos/novo" class="btn btn-primary btn-block">
+                                <i class="fas fa-plus"></i> Novo Produto
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="/movimentacoes/entrada" class="btn btn-success btn-block">
+                                <i class="fas fa-arrow-up"></i> Entrada de Estoque
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="/movimentacoes/saida" class="btn btn-warning btn-block">
+                                <i class="fas fa-arrow-down"></i> Saída de Estoque
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="/inventarios/novo" class="btn btn-info btn-block">
+                                <i class="fas fa-clipboard-list"></i> Novo Inventário
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimas Movimentações -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history"></i> Últimas Movimentações
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>Nenhuma movimentação encontrada</p>
+                        <small>As movimentações aparecerão aqui quando houver dados</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Links Úteis -->
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-link"></i> Acesso Rápido
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="/categorias" class="btn btn-outline-primary btn-sm btn-block">
+                                <i class="fas fa-tags"></i> Categorias
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="/fornecedores" class="btn btn-outline-primary btn-sm btn-block">
+                                <i class="fas fa-truck"></i> Fornecedores
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="/relatorios/estoque" class="btn btn-outline-primary btn-sm btn-block">
+                                <i class="fas fa-file-alt"></i> Relatórios
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="/dashboard/estoque" class="btn btn-outline-primary btn-sm btn-block">
+                                <i class="fas fa-chart-bar"></i> Dashboard Estoque
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // TODO: Carregar dados do dashboard quando os serviços estiverem implementados
+        await Task.CompletedTask;
+    }
+}

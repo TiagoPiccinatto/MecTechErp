@@ -1,0 +1,249 @@
+@page "/"
+@using MecTecERP.Application.Interfaces
+@inject IProdutoService ProdutoService
+@inject IOrdemServicoService OrdemServicoService
+@inject IClienteService ClienteService
+
+<PageTitle>Dashboard - MecTecERP</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">
+                <span class="oi oi-dashboard" aria-hidden="true"></span>
+                Dashboard
+            </h1>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Produtos Cadastrados
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@totalProdutos</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="oi oi-grid-three-up fa-2x text-gray-300"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Valor Total do Estoque
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@valorEstoque.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="oi oi-dollar fa-2x text-gray-300"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Clientes Ativos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@totalClientes</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="oi oi-people fa-2x text-gray-300"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Produtos com Estoque Baixo
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@produtosEstoqueBaixo</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="oi oi-warning fa-2x text-gray-300"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos e Tabelas -->
+    <div class="row">
+        <!-- Ordens de Serviço Recentes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <span class="oi oi-document" aria-hidden="true"></span>
+                        Ordens de Serviço Recentes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (ordensRecentes?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Número</th>
+                                        <th>Cliente</th>
+                                        <th>Status</th>
+                                        <th>Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ordem in ordensRecentes.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@ordem.Numero</td>
+                                            <td>@ordem.Cliente?.Nome</td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(ordem.Status)">@ordem.Status</span>
+                                            </td>
+                                            <td>@ordem.ValorTotal.ToString("C")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center">
+                            <a href="/ordens-servico" class="btn btn-primary btn-sm">
+                                Ver Todas as Ordens
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Nenhuma ordem de serviço encontrada.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Produtos com Estoque Baixo -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <span class="oi oi-warning" aria-hidden="true"></span>
+                        Produtos com Estoque Baixo
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (produtosBaixoEstoque?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Nome</th>
+                                        <th>Estoque</th>
+                                        <th>Mínimo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var produto in produtosBaixoEstoque.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@produto.Codigo</td>
+                                            <td>@produto.Nome</td>
+                                            <td class="text-danger font-weight-bold">@produto.QuantidadeEstoque</td>
+                                            <td>@produto.EstoqueMinimo</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center">
+                            <a href="/produtos?filtro=estoque-baixo" class="btn btn-warning btn-sm">
+                                Ver Todos os Produtos
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Todos os produtos estão com estoque adequado.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int totalProdutos;
+    private decimal valorEstoque;
+    private int totalClientes;
+    private int produtosEstoqueBaixo;
+    private IEnumerable<MecTecERP.Application.DTOs.OrdemServicoDto>? ordensRecentes;
+    private IEnumerable<MecTecERP.Application.DTOs.ProdutoDto>? produtosBaixoEstoque;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarDadosDashboard();
+    }
+
+    private async Task CarregarDadosDashboard()
+    {
+        try
+        {
+            // Carregar estatísticas
+            var produtos = await ProdutoService.ObterTodosAsync();
+            totalProdutos = produtos.Count();
+            valorEstoque = await ProdutoService.ObterValorTotalEstoqueAsync();
+            
+            var clientes = await ClienteService.ObterAtivosAsync();
+            totalClientes = clientes.Count();
+            
+            produtosBaixoEstoque = await ProdutoService.ObterProdutosEstoqueBaixoAsync();
+            
+            // Carregar ordens recentes
+            ordensRecentes = await OrdemServicoService.ObterMaisRecentesAsync(5);
+            
+            // Carregar produtos com estoque baixo
+            produtosBaixoEstoque = await ProdutoService.ObterPorEstoqueBaixoAsync();
+        }
+        catch (Exception ex)
+        {
+            // Log do erro
+            Console.WriteLine($"Erro ao carregar dashboard: {ex.Message}");
+        }
+    }
+
+    private string GetStatusBadgeClass(MecTecERP.Domain.Enums.StatusOrdemServico status)
+    {
+        return status switch
+        {
+            MecTecERP.Domain.Enums.StatusOrdemServico.Aberta => "badge-primary",
+            MecTecERP.Domain.Enums.StatusOrdemServico.EmAndamento => "badge-warning",
+            MecTecERP.Domain.Enums.StatusOrdemServico.Finalizada => "badge-success",
+            MecTecERP.Domain.Enums.StatusOrdemServico.Cancelada => "badge-danger",
+            _ => "badge-secondary"
+        };
+    }
+}

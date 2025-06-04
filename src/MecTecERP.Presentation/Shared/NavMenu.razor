@@ -1,0 +1,115 @@
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+            <img src="images/logo.png" alt="MecTecERP" height="30" class="me-2" />
+            MecTecERP
+        </a>
+        <button title="Alternar navegação" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="CollapseNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Dashboard
+            </NavLink>
+        </div>
+        
+        <!-- Estoque -->
+        <div class="nav-item px-3">
+            <div class="nav-section-header">
+                <span class="oi oi-box" aria-hidden="true"></span> Estoque
+            </div>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="categorias">
+                <span class="oi oi-tags" aria-hidden="true"></span> Categorias
+            </NavLink>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="fornecedores">
+                <span class="oi oi-people" aria-hidden="true"></span> Fornecedores
+            </NavLink>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="produtos">
+                <span class="oi oi-grid-three-up" aria-hidden="true"></span> Produtos
+            </NavLink>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="movimentacoes">
+                <span class="oi oi-transfer" aria-hidden="true"></span> Movimentações
+            </NavLink>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="inventarios">
+                <span class="oi oi-clipboard" aria-hidden="true"></span> Inventários
+            </NavLink>
+        </div>
+        
+        <!-- Clientes e Veículos -->
+        <div class="nav-item px-3">
+            <div class="nav-section-header">
+                <span class="oi oi-person" aria-hidden="true"></span> Clientes
+            </div>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="clientes">
+                <span class="oi oi-people" aria-hidden="true"></span> Clientes
+            </NavLink>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="veiculos">
+                <span class="oi oi-car" aria-hidden="true"></span> Veículos
+            </NavLink>
+        </div>
+        
+        <!-- Ordens de Serviço -->
+        <div class="nav-item px-3">
+            <div class="nav-section-header">
+                <span class="oi oi-wrench" aria-hidden="true"></span> Serviços
+            </div>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="ordens-servico">
+                <span class="oi oi-document" aria-hidden="true"></span> Ordens de Serviço
+            </NavLink>
+        </div>
+        
+        <!-- Relatórios -->
+        <div class="nav-item px-3">
+            <div class="nav-section-header">
+                <span class="oi oi-bar-chart" aria-hidden="true"></span> Relatórios
+            </div>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="relatorios/estoque">
+                <span class="oi oi-graph" aria-hidden="true"></span> Estoque
+            </NavLink>
+        </div>
+        <div class="nav-item px-3 ms-3">
+            <NavLink class="nav-link" href="relatorios/vendas">
+                <span class="oi oi-dollar" aria-hidden="true"></span> Vendas
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void CollapseNavMenu()
+    {
+        collapseNavMenu = true;
+    }
+}
