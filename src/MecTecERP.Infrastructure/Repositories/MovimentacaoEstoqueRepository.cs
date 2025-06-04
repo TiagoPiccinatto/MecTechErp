@@ -139,7 +139,7 @@ public class MovimentacaoEstoqueRepository : BaseRepository<MovimentacaoEstoque>
         return result.Distinct();
     }
 
-    public async Task<IEnumerable<MovimentacaoEstoque>> ObterPorTipoAsync(TipoMovimentacao tipo)
+    public async Task<IEnumerable<MovimentacaoEstoque>> ObterPorTipoAsync(TipoMovimentacaoEstoque tipo)
     {
         using var connection = _connectionFactory.CreateConnection();
         var sql = @"
@@ -177,7 +177,7 @@ public class MovimentacaoEstoqueRepository : BaseRepository<MovimentacaoEstoque>
         DateTime? dataFim = null,
         int? produtoId = null,
         int? inventarioId = null,
-        TipoMovimentacao? tipo = null,
+        TipoMovimentacaoEstoque? tipo = null,
         int pagina = 1,
         int tamanhoPagina = 10,
         string ordenarPor = "DataMovimentacao",
@@ -270,7 +270,7 @@ public class MovimentacaoEstoqueRepository : BaseRepository<MovimentacaoEstoque>
         DateTime? dataFim = null,
         int? produtoId = null,
         int? inventarioId = null,
-        TipoMovimentacao? tipo = null)
+        TipoMovimentacaoEstoque? tipo = null)
     {
         using var connection = _connectionFactory.CreateConnection();
         
@@ -387,7 +387,7 @@ public class MovimentacaoEstoqueRepository : BaseRepository<MovimentacaoEstoque>
         DateTime dataFim,
         int? produtoId = null,
         int? categoriaId = null,
-        TipoMovimentacao? tipo = null)
+        TipoMovimentacaoEstoque? tipo = null)
     {
         using var connection = _connectionFactory.CreateConnection();
         

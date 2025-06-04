@@ -41,11 +41,11 @@ public class MovimentacaoEstoqueCreateDtoValidator : AbstractValidator<Movimenta
         // Validação específica para movimentações de inventário
         RuleFor(x => x.InventarioId)
             .NotNull().WithMessage("O inventário é obrigatório para movimentações de inventário")
-            .When(x => x.Tipo == TipoMovimentacao.Inventario);
+            .When(x => x.Tipo == TipoMovimentacaoEstoque.Inventario);
 
         RuleFor(x => x.InventarioId)
             .Null().WithMessage("O inventário deve ser nulo para movimentações que não são de inventário")
-            .When(x => x.Tipo != TipoMovimentacao.Inventario);
+            .When(x => x.Tipo != TipoMovimentacaoEstoque.Inventario);
     }
 }
 
@@ -89,11 +89,11 @@ public class MovimentacaoEstoqueUpdateDtoValidator : AbstractValidator<Movimenta
         // Validação específica para movimentações de inventário
         RuleFor(x => x.InventarioId)
             .NotNull().WithMessage("O inventário é obrigatório para movimentações de inventário")
-            .When(x => x.Tipo == TipoMovimentacao.Inventario);
+            .When(x => x.Tipo == TipoMovimentacaoEstoque.Inventario);
 
         RuleFor(x => x.InventarioId)
             .Null().WithMessage("O inventário deve ser nulo para movimentações que não são de inventário")
-            .When(x => x.Tipo != TipoMovimentacao.Inventario);
+            .When(x => x.Tipo != TipoMovimentacaoEstoque.Inventario);
     }
 }
 

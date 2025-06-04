@@ -79,7 +79,7 @@ public class RelatorioMovimentacaoItemDto
     public string ProdutoCodigo { get; set; } = string.Empty;
     public string ProdutoNome { get; set; } = string.Empty;
     public string CategoriaNome { get; set; } = string.Empty;
-    public TipoMovimentacao Tipo { get; set; }
+    public TipoMovimentacaoEstoque Tipo { get; set; }
     public string TipoTexto { get; set; } = string.Empty;
     public string TipoClass { get; set; } = string.Empty;
     public decimal Quantidade { get; set; }
@@ -119,7 +119,7 @@ public class FiltroRelatorioMovimentacoesDto
     public string? ProdutoNome { get; set; }
     public int? CategoriaId { get; set; }
     public string? CategoriaNome { get; set; }
-    public TipoMovimentacao? Tipo { get; set; }
+    public TipoMovimentacaoEstoque? Tipo { get; set; }
     public int? InventarioId { get; set; }
     public string? Documento { get; set; }
     public string? OrdenarPor { get; set; } = "DataMovimentacao";
