@@ -9,7 +9,7 @@ namespace MecTecERP.Domain.Interfaces
         Task<IEnumerable<MovimentacaoEstoque>> ObterPorProdutoAsync(int produtoId);
         Task<IEnumerable<MovimentacaoEstoque>> ObterPorInventarioAsync(int inventarioId);
         Task<IEnumerable<MovimentacaoEstoque>> ObterPorPeriodoAsync(DateTime dataInicio, DateTime dataFim);
-        Task<IEnumerable<MovimentacaoEstoque>> ObterPorTipoAsync(TipoMovimentacao tipo);
+        Task<IEnumerable<MovimentacaoEstoque>> ObterPorTipoAsync(TipoMovimentacaoEstoque tipo);
         Task<decimal> CalcularSaldoProdutoAsync(int produtoId, DateTime? dataLimite = null);
         Task<IEnumerable<MovimentacaoEstoque>> ObterUltimasMovimentacoesAsync(int quantidade = 10);
         Task<IEnumerable<MovimentacaoEstoque>> ObterPorFiltroAsync(
@@ -17,7 +17,7 @@ namespace MecTecERP.Domain.Interfaces
             DateTime? dataFim = null,
             int? produtoId = null,
             int? inventarioId = null,
-            TipoMovimentacao? tipo = null,
+            TipoMovimentacaoEstoque? tipo = null,
             int pagina = 1,
             int tamanhoPagina = 10,
             string ordenarPor = "DataMovimentacao",
@@ -27,12 +27,12 @@ namespace MecTecERP.Domain.Interfaces
             DateTime? dataFim = null,
             int? produtoId = null,
             int? inventarioId = null,
-            TipoMovimentacao? tipo = null);
+            TipoMovimentacaoEstoque? tipo = null);
         Task<IEnumerable<object>> ObterRelatorioMovimentacaoAsync(
             DateTime dataInicio,
             DateTime dataFim,
             int? produtoId = null,
             int? categoriaId = null,
-            TipoMovimentacao? tipo = null);
+            TipoMovimentacaoEstoque? tipo = null);
     }
 }

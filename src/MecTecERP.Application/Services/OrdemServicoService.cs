@@ -707,7 +707,7 @@ namespace MecTecERP.Application.Services
                     await _movimentacaoRepository.CriarAsync(new MovimentacaoEstoque
                     {
                         ProdutoId = item.ProdutoId.Value,
-                        TipoMovimentacao = TipoMovimentacao.Entrada,
+                        Tipo = TipoMovimentacaoEstoque.Entrada,
                         Quantidade = item.Quantidade,
                         Observacao = $"Estorno - Remoção de item da OS {ordemServicoId}",
                         DataMovimentacao = DateTime.Now

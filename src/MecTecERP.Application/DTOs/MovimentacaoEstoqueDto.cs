@@ -8,7 +8,7 @@ public class MovimentacaoEstoqueDto : BaseDto
     public int ProdutoId { get; set; }
     public string ProdutoCodigo { get; set; } = string.Empty;
     public string ProdutoNome { get; set; } = string.Empty;
-    public TipoMovimentacao Tipo { get; set; }
+    public TipoMovimentacaoEstoque Tipo { get; set; }
     public string TipoTexto { get; set; } = string.Empty;
     public decimal Quantidade { get; set; }
     public decimal ValorUnitario { get; set; }
@@ -29,7 +29,7 @@ public class MovimentacaoEstoqueCreateDto : BaseCreateDto
     public int ProdutoId { get; set; }
 
     [Required(ErrorMessage = "O tipo de movimentação é obrigatório")]
-    public TipoMovimentacao Tipo { get; set; }
+    public TipoMovimentacaoEstoque Tipo { get; set; }
 
     [Required(ErrorMessage = "A quantidade é obrigatória")]
     [Range(0.01, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
@@ -58,7 +58,7 @@ public class MovimentacaoEstoqueUpdateDto : BaseUpdateDto
     public int ProdutoId { get; set; }
 
     [Required(ErrorMessage = "O tipo de movimentação é obrigatório")]
-    public TipoMovimentacao Tipo { get; set; }
+    public TipoMovimentacaoEstoque Tipo { get; set; }
 
     [Required(ErrorMessage = "A quantidade é obrigatória")]
     [Range(0.01, double.MaxValue, ErrorMessage = "A quantidade deve ser maior que zero")]
@@ -85,7 +85,7 @@ public class MovimentacaoEstoqueListDto
     public int Id { get; set; }
     public string ProdutoCodigo { get; set; } = string.Empty;
     public string ProdutoNome { get; set; } = string.Empty;
-    public TipoMovimentacao Tipo { get; set; }
+    public TipoMovimentacaoEstoque Tipo { get; set; }
     public string TipoTexto { get; set; } = string.Empty;
     public decimal Quantidade { get; set; }
     public decimal ValorUnitario { get; set; }
@@ -109,7 +109,7 @@ public class MovimentacaoEstoqueResumoDto
 public class MovimentacaoEstoqueFiltroDto
 {
     public int? ProdutoId { get; set; }
-    public TipoMovimentacao? Tipo { get; set; }
+    public TipoMovimentacaoEstoque? Tipo { get; set; }
     public DateTime? DataInicio { get; set; }
     public DateTime? DataFim { get; set; }
     public string? Documento { get; set; }

@@ -12,7 +12,7 @@ public interface IMovimentacaoEstoqueService
     Task<RespostaDto> ExcluirAsync(int id);
     Task<RespostaDto<List<MovimentacaoEstoqueListDto>>> ObterPorProdutoAsync(int produtoId, int limite = 10);
     Task<RespostaDto<List<MovimentacaoEstoqueListDto>>> ObterRecentesAsync(int limite = 10);
-    Task<RespostaDto<List<MovimentacaoEstoqueListDto>>> ObterPorTipoAsync(TipoMovimentacao tipo, DateTime? dataInicio = null, DateTime? dataFim = null);
+    Task<RespostaDto<List<MovimentacaoEstoqueListDto>>> ObterPorTipoAsync(TipoMovimentacaoEstoque tipo, DateTime? dataInicio = null, DateTime? dataFim = null);
     Task<RespostaDto<List<MovimentacaoEstoqueListDto>>> ObterPorInventarioAsync(int inventarioId);
     Task<RespostaDto<List<MovimentacaoEstoqueListDto>>> ObterPorDocumentoAsync(string documento);
     Task<RespostaDto<MovimentacaoEstoqueResumoDto>> ObterResumoAsync(DateTime? dataInicio = null, DateTime? dataFim = null);

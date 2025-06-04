@@ -972,7 +972,7 @@ namespace MecTecERP.Application.Services
                     {
                         ProdutoId = item.ProdutoId,
                         InventarioId = inventario.Id,
-                        Tipo = item.Divergencia > 0 ? TipoMovimentacao.Entrada : TipoMovimentacao.Saida,
+                        Tipo = item.Divergencia > 0 ? TipoMovimentacaoEstoque.Entrada : TipoMovimentacaoEstoque.Saida,
                         Quantidade = Math.Abs(item.Divergencia),
                         Valor = 0, // Ajustes não têm valor
                         DataMovimentacao = DateTime.Now,

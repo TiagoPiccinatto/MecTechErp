@@ -110,16 +110,18 @@ public class MappingProfile : Profile
         CreateMap<MovimentacaoEstoque, MovimentacaoEstoqueDto>()
             .ForMember(dest => dest.ProdutoCodigo, opt => opt.MapFrom(src => src.Produto.Codigo))
             .ForMember(dest => dest.ProdutoNome, opt => opt.MapFrom(src => src.Produto.Nome))
-            .ForMember(dest => dest.TipoTexto, opt => opt.MapFrom(src => 
-                src.Tipo == TipoMovimentacao.Entrada ? "Entrada" :
-                src.Tipo == TipoMovimentacao.Saida ? "Saída" :
-                src.Tipo == TipoMovimentacao.Ajuste ? "Ajuste" :
+            .ForMember(dest => dest.TipoTexto, opt => opt.MapFrom(src =>
+                src.Tipo == TipoMovimentacaoEstoque.Entrada ? "Entrada" :
+                src.Tipo == TipoMovimentacaoEstoque.Saida ? "Saída" :
+                src.Tipo == TipoMovimentacaoEstoque.Ajuste ? "Ajuste" :
+                src.Tipo == TipoMovimentacaoEstoque.Transferencia ? "Transferência" :
                 "Inventário"))
-            .ForMember(dest => dest.TipoClass, opt => opt.MapFrom(src => 
-                src.Tipo == TipoMovimentacao.Entrada ? "success" :
-                src.Tipo == TipoMovimentacao.Saida ? "danger" :
-                src.Tipo == TipoMovimentacao.Ajuste ? "warning" :
-                "info"))
+            .ForMember(dest => dest.TipoClass, opt => opt.MapFrom(src =>
+                src.Tipo == TipoMovimentacaoEstoque.Entrada ? "success" :
+                src.Tipo == TipoMovimentacaoEstoque.Saida ? "danger" :
+                src.Tipo == TipoMovimentacaoEstoque.Ajuste ? "warning" :
+                src.Tipo == TipoMovimentacaoEstoque.Transferencia ? "info" :
+                "secondary"))
             .ForMember(dest => dest.InventarioDescricao, opt => opt.MapFrom(src => src.Inventario != null ? src.Inventario.Descricao : null));
         
         CreateMap<MovimentacaoEstoqueCreateDto, MovimentacaoEstoque>()
@@ -138,16 +140,18 @@ public class MappingProfile : Profile
         CreateMap<MovimentacaoEstoque, MovimentacaoEstoqueListDto>()
             .ForMember(dest => dest.ProdutoCodigo, opt => opt.MapFrom(src => src.Produto.Codigo))
             .ForMember(dest => dest.ProdutoNome, opt => opt.MapFrom(src => src.Produto.Nome))
-            .ForMember(dest => dest.TipoTexto, opt => opt.MapFrom(src => 
-                src.Tipo == TipoMovimentacao.Entrada ? "Entrada" :
-                src.Tipo == TipoMovimentacao.Saida ? "Saída" :
-                src.Tipo == TipoMovimentacao.Ajuste ? "Ajuste" :
+            .ForMember(dest => dest.TipoTexto, opt => opt.MapFrom(src =>
+                src.Tipo == TipoMovimentacaoEstoque.Entrada ? "Entrada" :
+                src.Tipo == TipoMovimentacaoEstoque.Saida ? "Saída" :
+                src.Tipo == TipoMovimentacaoEstoque.Ajuste ? "Ajuste" :
+                src.Tipo == TipoMovimentacaoEstoque.Transferencia ? "Transferência" :
                 "Inventário"))
-            .ForMember(dest => dest.TipoClass, opt => opt.MapFrom(src => 
-                src.Tipo == TipoMovimentacao.Entrada ? "success" :
-                src.Tipo == TipoMovimentacao.Saida ? "danger" :
-                src.Tipo == TipoMovimentacao.Ajuste ? "warning" :
-                "info"));
+            .ForMember(dest => dest.TipoClass, opt => opt.MapFrom(src =>
+                src.Tipo == TipoMovimentacaoEstoque.Entrada ? "success" :
+                src.Tipo == TipoMovimentacaoEstoque.Saida ? "danger" :
+                src.Tipo == TipoMovimentacaoEstoque.Ajuste ? "warning" :
+                src.Tipo == TipoMovimentacaoEstoque.Transferencia ? "info" :
+                "secondary"));
 
         // Inventario Mappings
         CreateMap<Inventario, InventarioDto>()
@@ -157,11 +161,11 @@ public class MappingProfile : Profile
                 src.Status == StatusInventario.Finalizado ? "Finalizado" :
                 "Cancelado"))
             .ForMember(dest => dest.TotalItens, opt => opt.MapFrom(src => src.Itens.Count))
-            .ForMember(dest => dest.ItensContados, opt => opt.MapFrom(src => src.Itens.Count(i => i.Contado)))
-            .ForMember(dest => dest.ItensPendentes, opt => opt.MapFrom(src => src.Itens.Count(i => !i.Contado)))
-            .ForMember(dest => dest.ItensComDivergencia, opt => opt.MapFrom(src => src.Itens.Count(i => i.TemDivergencia)))
-            .ForMember(dest => dest.PercentualConcluido, opt => opt.MapFrom(src => 
-                src.Itens.Count > 0 ? (decimal)src.Itens.Count(i => i.Contado) / src.Itens.Count * 100 : 0));
+            .ForMember(dest => dest.ItensContados, opt => opt.MapFrom(src => src.Itens.Count(i => i.FoiContado())))
+            .ForMember(dest => dest.ItensPendentes, opt => opt.MapFrom(src => src.Itens.Count(i => !i.FoiContado())))
+            .ForMember(dest => dest.ItensComDivergencia, opt => opt.MapFrom(src => src.Itens.Count(i => i.TemDiferenca())))
+            .ForMember(dest => dest.PercentualConcluido, opt => opt.MapFrom(src =>
+                src.Itens.Count > 0 ? (decimal)src.Itens.Count(i => i.FoiContado()) / src.Itens.Count * 100 : 0));
         
         CreateMap<InventarioCreateDto, Inventario>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -182,31 +186,29 @@ public class MappingProfile : Profile
                 src.Status == StatusInventario.Finalizado ? "Finalizado" :
                 "Cancelado"))
             .ForMember(dest => dest.TotalItens, opt => opt.MapFrom(src => src.Itens.Count))
-            .ForMember(dest => dest.ItensContados, opt => opt.MapFrom(src => src.Itens.Count(i => i.Contado)))
-            .ForMember(dest => dest.ItensComDivergencia, opt => opt.MapFrom(src => src.Itens.Count(i => i.TemDivergencia)))
-            .ForMember(dest => dest.PercentualConcluido, opt => opt.MapFrom(src => 
-                src.Itens.Count > 0 ? (decimal)src.Itens.Count(i => i.Contado) / src.Itens.Count * 100 : 0));
+            .ForMember(dest => dest.ItensContados, opt => opt.MapFrom(src => src.Itens.Count(i => i.FoiContado())))
+            .ForMember(dest => dest.ItensComDivergencia, opt => opt.MapFrom(src => src.Itens.Count(i => i.TemDiferenca())))
+            .ForMember(dest => dest.PercentualConcluido, opt => opt.MapFrom(src =>
+                src.Itens.Count > 0 ? (decimal)src.Itens.Count(i => i.FoiContado()) / src.Itens.Count * 100 : 0));
 
         // InventarioItem Mappings
         CreateMap<InventarioItem, InventarioItemDto>()
             .ForMember(dest => dest.ProdutoCodigo, opt => opt.MapFrom(src => src.Produto.Codigo))
             .ForMember(dest => dest.ProdutoNome, opt => opt.MapFrom(src => src.Produto.Nome))
-            .ForMember(dest => dest.Diferenca, opt => opt.MapFrom(src => 
-                src.EstoqueContado.HasValue ? src.EstoqueContado.Value - src.EstoqueSistema : (decimal?)null))
-            .ForMember(dest => dest.TemDivergencia, opt => opt.MapFrom(src => 
-                src.EstoqueContado.HasValue && src.EstoqueContado.Value != src.EstoqueSistema));
+            .ForMember(dest => dest.Diferenca, opt => opt.MapFrom(src => src.Diferenca))
+            .ForMember(dest => dest.TemDivergencia, opt => opt.MapFrom(src => src.TemDiferenca()))
+            .ForMember(dest => dest.Contado, opt => opt.MapFrom(src => src.FoiContado()));
         
         CreateMap<InventarioItemUpdateDto, InventarioItem>()
             .ForMember(dest => dest.InventarioId, opt => opt.Ignore())
             .ForMember(dest => dest.ProdutoId, opt => opt.Ignore())
             .ForMember(dest => dest.EstoqueSistema, opt => opt.Ignore())
-            .ForMember(dest => dest.DataContagem, opt => opt.MapFrom(src => DateTime.Now))
-            .ForMember(dest => dest.Contado, opt => opt.MapFrom(src => true))
-            .ForMember(dest => dest.TemDivergencia, opt => opt.Ignore())
+            .ForMember(dest => dest.DataContagem, opt => opt.MapFrom(_ => DateTime.Now))
+            .ForMember(dest => dest.UsuarioContagem, opt => opt.Ignore())
+            .ForMember(dest => dest.Inventario, opt => opt.Ignore())
+            .ForMember(dest => dest.Produto, opt => opt.Ignore())
             .ForMember(dest => dest.DataCriacao, opt => opt.Ignore())
             .ForMember(dest => dest.DataAtualizacao, opt => opt.Ignore())
-            .ForMember(dest => dest.Ativo, opt => opt.Ignore())
-            .ForMember(dest => dest.Inventario, opt => opt.Ignore())
-            .ForMember(dest => dest.Produto, opt => opt.Ignore());
+            .ForMember(dest => dest.Ativo, opt => opt.Ignore());
     }
 }

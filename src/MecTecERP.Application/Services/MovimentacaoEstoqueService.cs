@@ -226,12 +226,11 @@ namespace MecTecERP.Application.Services
             }
         }
 
-        public async Task<RespostaDto<List<MovimentacaoEstoqueListDto>>> ObterPorTipoAsync(TipoMovimentacao tipo, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public async Task<RespostaDto<List<MovimentacaoEstoqueListDto>>> ObterPorTipoAsync(TipoMovimentacaoEstoque tipo, DateTime? dataInicio = null, DateTime? dataFim = null)
         {
             try
             {
-                var tipoEstoque = (TipoMovimentacaoEstoque)tipo;
-                var movimentacoes = await _movimentacaoRepository.ObterPorTipoAsync(tipoEstoque, dataInicio, dataFim);
+                var movimentacoes = await _movimentacaoRepository.ObterPorTipoAsync(tipo, dataInicio, dataFim);
                 var dtos = _mapper.Map<List<MovimentacaoEstoqueListDto>>(movimentacoes);
                 return new RespostaDto<List<MovimentacaoEstoqueListDto>>(true, "Movimentações obtidas com sucesso", dtos);
             }
