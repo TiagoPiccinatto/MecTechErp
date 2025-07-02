@@ -2,12 +2,12 @@ namespace MecTecERP.Domain.Enums
 {
     public enum StatusOrdemServico
     {
-        Aberta = 1,
-        EmAndamento = 2,
-        AguardandoPecas = 3,
-        AguardandoAprovacao = 4,
-        Finalizada = 5,
-        Cancelada = 6,
-        Entregue = 7
+        Protocolo = 1,
+        Orcamento = 2,
+        Aprovado = 3,
+        Execucao = 4,
+        AguardandoPeca = 5,
+        Finalizado = 6,
+        Cancelado = 7
     }
 }

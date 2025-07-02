@@ -22,6 +22,8 @@ public static class DependencyInjection
         services.AddScoped<IOrdemServicoRepository, OrdemServicoRepository>();
         services.AddScoped<ICategoriaRepository, CategoriaRepository>();
         services.AddScoped<IFornecedorRepository, FornecedorRepository>();
+        services.AddScoped<IMovimentacaoEstoqueRepository, MovimentacaoEstoqueRepository>(); // Adicionado
+        services.AddScoped<IInventarioRepository, InventarioRepository>(); // Adicionado
         // services.AddScoped<IItemOrdemServicoRepository, ItemOrdemServicoRepository>(); // Removido - não implementado
         // services.AddScoped<IServicoRepository, ServicoRepository>(); // Removido - não implementado
         // services.AddScoped<IUsuarioRepository, UsuarioRepository>(); // Removido - não implementado

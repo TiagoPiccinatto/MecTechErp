@@ -27,5 +27,6 @@ namespace MecTecERP.Domain.Interfaces
             string? estado = null,
             bool? ativo = null);
         Task<IEnumerable<Fornecedor>> ObterParaSelectAsync();
+        Task<bool> PossuiProdutosAsync(int fornecedorId); // Adicionado
     }
 }

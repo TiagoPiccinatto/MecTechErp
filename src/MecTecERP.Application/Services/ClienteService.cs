@@ -8,6 +8,7 @@ using MecTecERP.Application.DTOs;
 using MecTecERP.Application.Interfaces;
 using MecTecERP.Domain.Entities;
 using MecTecERP.Domain.Interfaces;
+using FluentValidation; // Adicionado para IValidator
 
 namespace MecTecERP.Application.Services
 {
@@ -18,39 +19,48 @@ namespace MecTecERP.Application.Services
         private readonly IOrdemServicoRepository _ordemServicoRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<ClienteService> _logger;
+        private readonly IValidator<ClienteCreateDto> _clienteCreateValidator; // Adicionado
+        private readonly IValidator<ClienteUpdateDto> _clienteUpdateValidator; // Adicionado (para AtualizarAsync)
+
 
         public ClienteService(
             IClienteRepository clienteRepository,
             IVeiculoRepository veiculoRepository,
             IOrdemServicoRepository ordemServicoRepository,
             IMapper mapper,
-            ILogger<ClienteService> logger)
+            ILogger<ClienteService> logger,
+            IValidator<ClienteCreateDto> clienteCreateValidator, // Adicionado
+            IValidator<ClienteUpdateDto> clienteUpdateValidator) // Adicionado
         {
             _clienteRepository = clienteRepository;
             _veiculoRepository = veiculoRepository;
             _ordemServicoRepository = ordemServicoRepository;
             _mapper = mapper;
             _logger = logger;
+            _clienteCreateValidator = clienteCreateValidator; // Adicionado
+            _clienteUpdateValidator = clienteUpdateValidator; // Adicionado
         }
 
         public async Task<RespostaDto<PaginacaoDto<ClienteListDto>>> ObterTodosAsync(ClienteFiltroDto filtro)
         {
             try
             {
-                var clientes = await _clienteRepository.ObterComFiltroAsync(
-                    filtro.Nome,
+                // Ajustar os nomes dos campos do filtro se ClienteFiltroDto não foi atualizado para NomeRazaoSocial, Uf etc.
+                // Assumindo que ClienteFiltroDto foi atualizado para usar NomeRazaoSocial e Uf.
+                var clientes = await _clienteRepository.ObterPorFiltroAsync( // Nome do método no repo é ObterPorFiltroAsync
+                    filtro.NomeRazaoSocial, // Usar NomeRazaoSocial do DTO
                     filtro.CpfCnpj,
                     filtro.Email,
-                    filtro.Telefone,
+                    filtro.Telefone, // Repositório já trata Telefone1 ou Telefone2
                     filtro.Cidade,
                     filtro.Ativo,
                     filtro.Pagina,
                     filtro.ItensPorPagina,
-                    filtro.OrdenarPor,
+                    filtro.OrdenarPor, // Repositório já trata os aliases "nome" -> "NomeRazaoSocial", "estado" -> "Uf"
                     filtro.OrdemDecrescente);
 
-                var total = await _clienteRepository.ContarComFiltroAsync(
-                    filtro.Nome,
+                var total = await _clienteRepository.ContarPorFiltroAsync(
+                    filtro.NomeRazaoSocial, // Usar NomeRazaoSocial do DTO
                     filtro.CpfCnpj,
                     filtro.Email,
                     filtro.Telefone,
@@ -93,11 +103,18 @@ namespace MecTecERP.Application.Services
         {
             try
             {
+                var validationResult = await _clienteCreateValidator.ValidateAsync(dto);
+                if (!validationResult.IsValid)
+                {
+                    return new RespostaDto<ClienteDto>(false, "Dados inválidos",
+                        validationResult.Errors.Select(e => e.ErrorMessage).ToList());
+                }
+
                 // Validar se CPF/CNPJ já existe
                 if (!string.IsNullOrEmpty(dto.CpfCnpj))
                 {
                     var existeCpfCnpj = await ExisteCpfCnpjAsync(dto.CpfCnpj);
-                    if (existeCpfCnpj.Dados)
+                    if (existeCpfCnpj.Sucesso && existeCpfCnpj.Dados) // Ajustado para checar Sucesso também
                     {
                         return new RespostaDto<ClienteDto>(false, "CPF/CNPJ já cadastrado");
                     }
@@ -107,15 +124,16 @@ namespace MecTecERP.Application.Services
                 if (!string.IsNullOrEmpty(dto.Email))
                 {
                     var existeEmail = await ExisteEmailAsync(dto.Email);
-                    if (existeEmail.Dados)
+                    if (existeEmail.Sucesso && existeEmail.Dados) // Ajustado para checar Sucesso também
                     {
                         return new RespostaDto<ClienteDto>(false, "Email já cadastrado");
                     }
                 }
 
                 var cliente = _mapper.Map<Cliente>(dto);
-                cliente.DataCadastro = DateTime.Now;
-                cliente.Ativo = true;
+                // DataCriacao e Ativo são definidos pelo BaseRepository.AdicionarAsync
+                // cliente.DataCadastro = DateTime.Now; // Removido
+                // cliente.Ativo = true; // Removido
                 
                 var novoCliente = await _clienteRepository.AdicionarAsync(cliente);
                 
@@ -262,9 +280,13 @@ namespace MecTecERP.Application.Services
                     return RespostaDto<List<ClienteListDto>>.Erro("Nome é obrigatório");
                 }
 
-                var clientes = await _clienteRepository.ObterTodosAsync();
-                var clientesFiltrados = clientes.Where(c => c.Nome.Contains(nome, StringComparison.OrdinalIgnoreCase)).ToList();
-                var dtos = _mapper.Map<List<ClienteListDto>>(clientesFiltrados);
+                // Usar o método de filtro do repositório para performance
+                var clientes = await _clienteRepository.ObterPorFiltroAsync(
+                    nome: nome,
+                    pagina: 1,
+                    tamanhoPagina: int.MaxValue); // Pegar todos que correspondem
+
+                var dtos = _mapper.Map<List<ClienteListDto>>(clientes);
                 
                 return RespostaDto<List<ClienteListDto>>.Sucesso(dtos);
             }

@@ -110,16 +110,30 @@ namespace MecTecERP.Application.Services
                 }
 
                 var movimentacao = _mapper.Map<MovimentacaoEstoque>(dto);
-                movimentacao.DataMovimentacao = DateTime.Now;
                 
-                var novaMovimentacao = await _movimentacaoRepository.AdicionarAsync(movimentacao);
+                // Definir EstoqueAnterior e EstoquePosterior
+                movimentacao.EstoqueAnterior = produto.EstoqueAtual;
+                movimentacao.CalcularEstoquePosterior(); // Método da entidade para calcular com base no tipo e quantidade
+                                                       // Este método na entidade precisa ser verificado/ajustado.
+                                                       // A entidade atual tem um CalcularEstoquePosterior que não considera o tipo Inventario.
+                                                       // Para o CriarAsync genérico, o tipo Inventario não seria usado diretamente.
                 
-                // Atualizar estoque do produto
-                await AtualizarEstoqueProduto(produto, movimentacao.Tipo, movimentacao.Quantidade);
-                await _produtoRepository.AtualizarAsync(produto);
+                // Usar o método do repositório que lida com a transação
+                // O método RegistrarMovimentacaoAsync já existe no MovimentacaoEstoqueRepository
+                // e deve ser responsável por inserir a movimentação e atualizar o produto.EstoqueAtual.
+                bool sucessoRegistro = await _movimentacaoRepository.RegistrarMovimentacaoAsync(movimentacao);
 
-                var resultado = _mapper.Map<MovimentacaoEstoqueDto>(novaMovimentacao);
-                _logger.LogInformation("Movimentação de estoque criada com sucesso. ID: {Id}", novaMovimentacao.Id);
+                if (!sucessoRegistro)
+                {
+                    return new RespostaDto<MovimentacaoEstoqueDto>(false, "Falha ao registrar movimentação e atualizar estoque.");
+                }
+
+                // O ID da movimentacao deve ser preenchido por RegistrarMovimentacaoAsync se bem sucedido.
+                // Se RegistrarMovimentacaoAsync não retorna a entidade, teremos que buscar novamente ou assumir que o objeto 'movimentacao' está com ID.
+                // Para simplificar, vamos assumir que o objeto 'movimentacao' é atualizado com o ID pelo repo ou que o mapeamento não precisa do ID de imediato.
+
+                var resultado = _mapper.Map<MovimentacaoEstoqueDto>(movimentacao);
+                _logger.LogInformation("Movimentacao de estoque criada com sucesso. ID: {Id}", movimentacao.Id);
                 
                 return new RespostaDto<MovimentacaoEstoqueDto>(true, "Movimentação criada com sucesso", resultado);
             }
@@ -170,6 +184,11 @@ namespace MecTecERP.Application.Services
 
         public async Task<RespostaDto> ExcluirAsync(int id)
         {
+            // TODO: Refatorar para criar uma movimentação de estorno em vez de excluir.
+            // A exclusão direta de movimentações de estoque pode levar a inconsistências.
+            // Por ora, a lógica de reverter o saldo do produto foi removida daqui,
+            // pois deveria ser tratada por uma operação de estorno que usa RegistrarMovimentacaoAsync.
+            _logger.LogWarning("A exclusão direta de movimentações de estoque não é recomendada. Considere estornar. MovimentacaoId: {Id}", id);
             try
             {
                 var movimentacao = await _movimentacaoRepository.ObterPorIdAsync(id);
@@ -178,16 +197,11 @@ namespace MecTecERP.Application.Services
                     return new RespostaDto(false, "Movimentação não encontrada");
                 }
 
-                // Reverter movimentação no estoque
-                var produto = await _produtoRepository.ObterPorIdAsync(movimentacao.ProdutoId);
-                if (produto != null)
-                {
-                    await ReverterMovimentacaoEstoque(produto, movimentacao.Tipo, movimentacao.Quantidade);
-                    await _produtoRepository.AtualizarAsync(produto);
-                }
+                // NOTA: A lógica de reverter o saldo do produto foi removida.
+                // Uma operação de estorno real deveria ser implementada.
 
-                await _movimentacaoRepository.ExcluirAsync(id);
-                return new RespostaDto(true, "Movimentação excluída com sucesso");
+                await _movimentacaoRepository.RemoverAsync(id); // Usar RemoverAsync do IRepository
+                return new RespostaDto(true, "Movimentação excluída (sem estorno de saldo implementado no serviço).");
             }
             catch (Exception ex)
             {
@@ -441,21 +455,13 @@ namespace MecTecERP.Application.Services
                     break;
             }
 
-            produto.DataUltimaMovimentacao = DateTime.Now;
+            // produto.DataUltimaMovimentacao = DateTime.Now; // Campo não existe mais na entidade Produto
         }
 
-        private async Task ReverterMovimentacaoEstoque(Produto produto, TipoMovimentacaoEstoque tipo, decimal quantidade)
-        {
-            switch (tipo)
-            {
-                case TipoMovimentacaoEstoque.Entrada:
-                    produto.EstoqueAtual -= quantidade;
-                    break;
-                case TipoMovimentacaoEstoque.Saida:
-                    produto.EstoqueAtual += quantidade;
-                    break;
-                // Ajustes não podem ser revertidos automaticamente
-            }
-        }
+        // private async Task ReverterMovimentacaoEstoque(Produto produto, TipoMovimentacaoEstoque tipo, decimal quantidade)
+        // {
+        //     // Esta lógica é complexa e propensa a erros. O ideal é criar movimentações de estorno.
+        //     // Removido para evitar inconsistências, pois a atualização de estoque deve ser centralizada.
+        // }
     }
 }

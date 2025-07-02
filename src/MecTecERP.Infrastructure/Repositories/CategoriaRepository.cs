@@ -19,7 +19,8 @@ public class CategoriaRepository : BaseRepository<Categoria>, ICategoriaReposito
         SET Nome = @Nome, 
             Descricao = @Descricao, 
             DataAtualizacao = @DataAtualizacao, 
-            UsuarioAtualizacao = @UsuarioAtualizacao
+            UsuarioAtualizacao = @UsuarioAtualizacao,
+            Ativo = @Ativo
         WHERE Id = @Id";
 
     public CategoriaRepository(IDbConnectionFactory connectionFactory) : base(connectionFactory)
@@ -140,5 +141,13 @@ public class CategoriaRepository : BaseRepository<Categoria>, ICategoriaReposito
         using var connection = _connectionFactory.CreateConnection();
         var sql = "SELECT Id, Nome FROM Categorias WHERE Ativo = 1 ORDER BY Nome";
         return await connection.QueryAsync<Categoria>(sql);
+    }
+
+    public async Task<bool> PossuiProdutosAsync(int categoriaId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var sql = "SELECT COUNT(1) FROM Produtos WHERE CategoriaId = @CategoriaId AND Ativo = 1";
+        var count = await connection.QuerySingleAsync<int>(sql, new { CategoriaId = categoriaId });
+        return count > 0;
     }
 }

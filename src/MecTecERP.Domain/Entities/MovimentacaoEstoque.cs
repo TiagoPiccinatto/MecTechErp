@@ -39,10 +39,12 @@ public class MovimentacaoEstoque : BaseEntity
     // Chaves estrangeiras
     public int ProdutoId { get; set; }
     public int? InventarioId { get; set; }
+    public int? OrdemServicoItemId { get; set; } // Adicionado
     
     // Relacionamentos
     public virtual Produto Produto { get; set; } = null!;
     public virtual Inventario? Inventario { get; set; }
+    public virtual OrdemServicoItem? OrdemServicoItem { get; set; } // Adicionado
     
     // Métodos de negócio
     public bool IsEntrada()

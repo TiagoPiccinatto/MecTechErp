@@ -13,24 +13,24 @@ public class ProdutoRepository : BaseRepository<Produto>, IProdutoRepository
     
     protected override string InsertQuery => @"
         INSERT INTO Produtos (Codigo, Nome, Descricao, Unidade, PrecoCusto, PrecoVenda, 
-                             EstoqueAtual, EstoqueMinimo, EstoqueMaximo, Localizacao, 
+                             EstoqueAtual, EstoqueMinimo, EstoqueMaximo, Localizacao, FotoUrl,
                              Observacoes, CodigoBarras, CategoriaId, FornecedorId, 
                              DataCriacao, DataAtualizacao, Ativo, UsuarioCriacao, UsuarioAtualizacao)
         VALUES (@Codigo, @Nome, @Descricao, @Unidade, @PrecoCusto, @PrecoVenda, 
-                @EstoqueAtual, @EstoqueMinimo, @EstoqueMaximo, @Localizacao, 
+                @EstoqueAtual, @EstoqueMinimo, @EstoqueMaximo, @Localizacao, @FotoUrl,
                 @Observacoes, @CodigoBarras, @CategoriaId, @FornecedorId, 
                 @DataCriacao, @DataAtualizacao, @Ativo, @UsuarioCriacao, @UsuarioAtualizacao);
-        SELECT CAST(SCOPE_IDENTITY() as int);";
+        SELECT CAST(SCOPE_IDENTITY() as int);"; // Unidade aqui será o valor int do enum UnidadeMedida
     
     protected override string UpdateQuery => @"
         UPDATE Produtos SET 
             Codigo = @Codigo, Nome = @Nome, Descricao = @Descricao, Unidade = @Unidade,
             PrecoCusto = @PrecoCusto, PrecoVenda = @PrecoVenda, EstoqueAtual = @EstoqueAtual,
             EstoqueMinimo = @EstoqueMinimo, EstoqueMaximo = @EstoqueMaximo, 
-            Localizacao = @Localizacao, Observacoes = @Observacoes, CodigoBarras = @CodigoBarras,
+            Localizacao = @Localizacao, FotoUrl = @FotoUrl, Observacoes = @Observacoes, CodigoBarras = @CodigoBarras,
             CategoriaId = @CategoriaId, FornecedorId = @FornecedorId, 
-            DataAtualizacao = @DataAtualizacao, UsuarioAtualizacao = @UsuarioAtualizacao
-        WHERE Id = @Id";
+            DataAtualizacao = @DataAtualizacao, UsuarioAtualizacao = @UsuarioAtualizacao, Ativo = @Ativo
+        WHERE Id = @Id"; // Unidade aqui será o valor int do enum UnidadeMedida
 
     public ProdutoRepository(IDbConnectionFactory connectionFactory) : base(connectionFactory)
     {

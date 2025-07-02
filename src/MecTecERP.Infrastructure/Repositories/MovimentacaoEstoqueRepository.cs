@@ -11,29 +11,32 @@ public class MovimentacaoEstoqueRepository : BaseRepository<MovimentacaoEstoque>
     protected override string TableName => "MovimentacoesEstoque";
     
     protected override string InsertQuery => @"
-        INSERT INTO MovimentacoesEstoque (ProdutoId, InventarioId, Tipo, Quantidade, 
-                                         QuantidadeAnterior, QuantidadeAtual, Observacoes, 
+        INSERT INTO MovimentacoesEstoque (ProdutoId, InventarioId, OrdemServicoItemId, Tipo, Quantidade,
+                                         EstoqueAnterior, EstoquePosterior, Observacoes, Documento,
                                          DataMovimentacao, DataCriacao, DataAtualizacao, 
-                                         Ativo, UsuarioCriacao)
-        VALUES (@ProdutoId, @InventarioId, @Tipo, @Quantidade, 
-                @QuantidadeAnterior, @QuantidadeAtual, @Observacoes, 
+                                         Ativo, UsuarioCriacao, UsuarioAtualizacao)
+        VALUES (@ProdutoId, @InventarioId, @OrdemServicoItemId, @Tipo, @Quantidade,
+                @EstoqueAnterior, @EstoquePosterior, @Observacoes, @Documento,
                 @DataMovimentacao, @DataCriacao, @DataAtualizacao, 
-                @Ativo, @UsuarioCriacao);
-        SELECT CAST(SCOPE_IDENTITY() as int);";
+                @Ativo, @UsuarioCriacao, @UsuarioAtualizacao);
+        SELECT CAST(SCOPE_IDENTITY() as int);"; // Adicionado OrdemServicoItemId, Documento. Renomeado QuantidadeAnterior/Atual para EstoqueAnterior/Posterior
     
     protected override string UpdateQuery => @"
         UPDATE MovimentacoesEstoque 
         SET ProdutoId = @ProdutoId, 
             InventarioId = @InventarioId,
+            OrdemServicoItemId = @OrdemServicoItemId,
             Tipo = @Tipo,
             Quantidade = @Quantidade,
-            QuantidadeAnterior = @QuantidadeAnterior,
-            QuantidadeAtual = @QuantidadeAtual,
+            EstoqueAnterior = @EstoqueAnterior, -- Renomeado
+            EstoquePosterior = @EstoquePosterior, -- Renomeado
             Observacoes = @Observacoes,
+            Documento = @Documento,
             DataMovimentacao = @DataMovimentacao,
             DataAtualizacao = @DataAtualizacao, 
-            UsuarioAtualizacao = @UsuarioAtualizacao
-        WHERE Id = @Id";
+            UsuarioAtualizacao = @UsuarioAtualizacao,
+            Ativo = @Ativo
+        WHERE Id = @Id"; // Adicionado OrdemServicoItemId, Documento, Ativo. Renomeado QuantidadeAnterior/Atual
 
     public MovimentacaoEstoqueRepository(IDbConnectionFactory connectionFactory) : base(connectionFactory)
     {

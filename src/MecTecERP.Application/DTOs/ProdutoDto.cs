@@ -14,9 +14,10 @@ public class ProdutoDto : BaseDto
     public string? FornecedorNome { get; set; }
     public UnidadeMedida UnidadeMedida { get; set; }
     public string UnidadeMedidaTexto { get; set; } = string.Empty;
-    public decimal PrecoCompra { get; set; }
+    public decimal PrecoCusto { get; set; } // Alterado de PrecoCompra
     public decimal PrecoVenda { get; set; }
     public decimal EstoqueAtual { get; set; }
+    public string? FotoUrl { get; set; } // Adicionado
     public decimal EstoqueMinimo { get; set; }
     public decimal EstoqueMaximo { get; set; }
     public string? Localizacao { get; set; }
@@ -49,9 +50,9 @@ public class ProdutoCreateDto : BaseCreateDto
     [Required(ErrorMessage = "A unidade de medida é obrigatória")]
     public UnidadeMedida UnidadeMedida { get; set; }
 
-    [Required(ErrorMessage = "O preço de compra é obrigatório")]
-    [Range(0.01, double.MaxValue, ErrorMessage = "O preço de compra deve ser maior que zero")]
-    public decimal PrecoCompra { get; set; }
+    [Required(ErrorMessage = "O preço de custo é obrigatório")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "O preço de custo deve ser maior que zero")]
+    public decimal PrecoCusto { get; set; } // Alterado de PrecoCompra
 
     [Required(ErrorMessage = "O preço de venda é obrigatório")]
     [Range(0.01, double.MaxValue, ErrorMessage = "O preço de venda deve ser maior que zero")]
@@ -74,6 +75,8 @@ public class ProdutoCreateDto : BaseCreateDto
 
     [StringLength(1000, ErrorMessage = "As observações devem ter no máximo 1000 caracteres")]
     public string? Observacoes { get; set; }
+    [StringLength(255, ErrorMessage = "A URL da foto deve ter no máximo 255 caracteres")]
+    public string? FotoUrl { get; set; } // Adicionado
 }
 
 public class ProdutoUpdateDto : BaseUpdateDto
@@ -123,6 +126,8 @@ public class ProdutoUpdateDto : BaseUpdateDto
 
     [StringLength(1000, ErrorMessage = "As observações devem ter no máximo 1000 caracteres")]
     public string? Observacoes { get; set; }
+    [StringLength(255, ErrorMessage = "A URL da foto deve ter no máximo 255 caracteres")]
+    public string? FotoUrl { get; set; } // Adicionado
 }
 
 public class ProdutoListDto

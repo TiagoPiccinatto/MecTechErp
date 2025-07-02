@@ -17,9 +17,8 @@ public class Produto : BaseEntity
     
     [StringLength(1000, ErrorMessage = "Descrição deve ter no máximo 1000 caracteres")]
     public string? Descricao { get; set; }
-    
-    [StringLength(20, ErrorMessage = "Unidade deve ter no máximo 20 caracteres")]
-    public string? Unidade { get; set; }
+
+    public UnidadeMedida Unidade { get; set; } = UnidadeMedida.Unidade; // Alterado de string para enum
     
     [Column(TypeName = "decimal(18,2)")]
     [Range(0, double.MaxValue, ErrorMessage = "Preço de custo deve ser maior ou igual a zero")]
@@ -57,8 +56,10 @@ public class Produto : BaseEntity
     // Relacionamentos
     public virtual Categoria Categoria { get; set; } = null!;
     public virtual Fornecedor? Fornecedor { get; set; }
+    public string? FotoUrl { get; set; } // Adicionado FotoUrl
     public virtual ICollection<MovimentacaoEstoque> MovimentacoesEstoque { get; set; } = new List<MovimentacaoEstoque>();
-    public virtual ICollection<InventarioItem> ItensInventario { get; set; } = new List<InventarioItem>();
+    public virtual ICollection<InventarioItem> InventarioItens { get; set; } = new List<InventarioItem>(); // Renomeado de ItensInventario
+    public virtual ICollection<OrdemServicoItem> OrdemServicoItens { get; set; } = new List<OrdemServicoItem>(); // Adicionado
     
     // Métodos de negócio
     public bool EstoqueAbaixoDoMinimo()

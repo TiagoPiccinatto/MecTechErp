@@ -29,15 +29,15 @@ public class CategoriaService : ICategoriaService
         {
             _logger.LogInformation("Obtendo categorias com filtros: {@Filtro}", filtro);
 
-            var categorias = await _categoriaRepository.ObterTodosAsync(
-                filtro.Nome,
-                filtro.Ativo,
+            var categorias = await _categoriaRepository.ObterPorFiltroAsync( // Ajustado para ObterPorFiltroAsync
+                filtro.Nome, // Assumindo que FiltroBaseDto tem Nome
+                filtro.Ativo, // Assumindo que FiltroBaseDto tem Ativo
                 filtro.Pagina,
                 filtro.ItensPorPagina,
                 filtro.OrdenarPor,
                 filtro.OrdemDecrescente);
 
-            var total = await _categoriaRepository.ContarAsync(filtro.Nome, filtro.Ativo);
+            var total = await _categoriaRepository.ContarPorFiltroAsync(filtro.Nome, filtro.Ativo); // Ajustado para ContarPorFiltroAsync
 
             var categoriasDto = _mapper.Map<List<CategoriaListDto>>(categorias);
 
@@ -116,14 +116,15 @@ public class CategoriaService : ICategoriaService
             }
 
             var categoria = _mapper.Map<Categoria>(categoriaDto);
-            categoria.DataCriacao = DateTime.Now;
-            categoria.Ativo = true;
+            // DataCriacao e Ativo são definidos pelo BaseRepository.AdicionarAsync
+            // categoria.DataCriacao = DateTime.Now; // Removido
+            // categoria.Ativo = true; // Removido
 
             var categoriaCriada = await _categoriaRepository.AdicionarAsync(categoria);
             
             _logger.LogInformation("Categoria criada com sucesso. ID: {Id}", categoriaCriada.Id);
             
-            var resultado = _mapper.Map<CategoriaDto>(categoriaCriada);
+            var resultado = _mapper.Map<CategoriaDto>(categoriaCriada); // Mapear a entidade retornada pelo AdicionarAsync
             return RespostaDto<CategoriaDto>.Sucesso(resultado);
         }
         catch (Exception ex)
@@ -152,13 +153,14 @@ public class CategoriaService : ICategoriaService
             }
 
             _mapper.Map(categoriaDto, categoria);
-            categoria.DataAtualizacao = DateTime.Now;
+            // DataAtualizacao é definida pelo BaseRepository.AtualizarAsync
+            // categoria.DataAtualizacao = DateTime.Now; // Removido
 
-            var categoriaAtualizada = await _categoriaRepository.AtualizarAsync(categoria);
+            await _categoriaRepository.AtualizarAsync(categoria); // AtualizarAsync é void
             
-            _logger.LogInformation("Categoria atualizada com sucesso. ID: {Id}", categoriaAtualizada.Id);
+            _logger.LogInformation("Categoria atualizada com sucesso. ID: {Id}", categoria.Id); // Usar categoria.Id
             
-            var resultado = _mapper.Map<CategoriaDto>(categoriaAtualizada);
+            var resultado = _mapper.Map<CategoriaDto>(categoria); // Mapear a instância 'categoria' que foi atualizada pelo mapper
             return RespostaDto<CategoriaDto>.Sucesso(resultado);
         }
         catch (Exception ex)
@@ -236,8 +238,8 @@ public class CategoriaService : ICategoriaService
     {
         try
         {
-            var existe = await _categoriaRepository.ExisteAsync(id);
-            return RespostaDto<bool>.Sucesso(existe);
+            var categoria = await _categoriaRepository.ObterPorIdAsync(id);
+            return RespostaDto<bool>.Sucesso(categoria != null);
         }
         catch (Exception ex)
         {

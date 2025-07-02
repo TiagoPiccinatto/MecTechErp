@@ -1,0 +1,109 @@
+@page "/clientes"
+@using MecTecERP.Application.DTOs
+@using MecTecERP.Application.Interfaces
+@inject IClienteService ClienteService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Clientes</PageTitle>
+
+<h1>Clientes</h1>
+
+@if (clientes == null)
+{
+    <p><em>Carregando clientes...</em></p>
+}
+else
+{
+    <p>
+        <button class="btn btn-primary" @onclick="IrParaCriarCliente">Novo Cliente</button>
+    </p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nome/Razão Social</th>
+                <th>CPF/CNPJ</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th>Cidade/UF</th>
+                <th>Ativo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in clientes.Itens)
+            {
+                <tr>
+                    <td>@cliente.NomeRazaoSocial</td>
+                    <td>@cliente.CpfCnpj</td>
+                    <td>@cliente.Email</td>
+                    <td>@cliente.Telefone1</td>
+                    <td>@cliente.Cidade / @cliente.Uf</td>
+                    <td>@(cliente.Ativo ? "Sim" : "Não")</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" @onclick="() => VerDetalhes(cliente.Id)">Detalhes</button>
+                        <button class="btn btn-sm btn-warning" @onclick="() => EditarCliente(cliente.Id)">Editar</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => ExcluirCliente(cliente.Id)">Excluir</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* TODO: Adicionar componente de paginação aqui *@
+}
+
+@code {
+    private PaginacaoDto<ClienteListDto>? clientes;
+    private ClienteFiltroDto filtro = new ClienteFiltroDto { Pagina = 1, ItensPorPagina = 10 }; // Filtro inicial
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarClientes();
+    }
+
+    private async Task CarregarClientes()
+    {
+        var resposta = await ClienteService.ObterTodosAsync(filtro);
+        if (resposta.Sucesso && resposta.Dados != null)
+        {
+            clientes = resposta.Dados;
+        }
+        else
+        {
+            // TODO: Tratar erro, talvez com Blazored.Toast
+            clientes = new PaginacaoDto<ClienteListDto>(new List<ClienteListDto>(), 0, filtro.Pagina, filtro.ItensPorPagina);
+        }
+    }
+
+    private void IrParaCriarCliente()
+    {
+        NavigationManager.NavigateTo("/clientes/novo");
+    }
+
+    private void VerDetalhes(int id)
+    {
+        NavigationManager.NavigateTo($"/clientes/detalhes/{id}");
+    }
+
+    private void EditarCliente(int id)
+    {
+        NavigationManager.NavigateTo($"/clientes/editar/{id}");
+    }
+
+    private async Task ExcluirCliente(int id)
+    {
+        // TODO: Adicionar confirmação (ex: Blazored.Modal)
+        var resposta = await ClienteService.ExcluirAsync(id);
+        if (resposta.Sucesso)
+        {
+            // TODO: Mostrar toast de sucesso
+            await CarregarClientes(); // Recarregar lista
+        }
+        else
+        {
+            // TODO: Mostrar toast de erro
+        }
+    }
+
+    // TODO: Métodos para mudar página, aplicar filtros, etc.
+}

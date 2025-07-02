@@ -12,25 +12,28 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
     protected override string TableName => "OrdensServico";
     
     protected override string InsertQuery => @"
-        INSERT INTO OrdensServico (Numero, ClienteId, VeiculoId, DataAbertura, DataPrevista, 
-                                  DataConclusao, StatusOrdem, Descricao, Observacoes, 
-                                  ValorServicos, ValorPecas, ValorTotal, Desconto, 
+        INSERT INTO OrdensServico (Numero, ClienteId, VeiculoId, DataEntrada, DataPrevisaoEntrega, DataConclusao,
+                                  ProblemaRelatado, DiagnosticoTecnico, ValorServicos, ValorPecas, ValorDesconto, ValorTotal,
+                                  Status, ObservacoesInternas, ObservacoesCliente, MecanicoResponsavelId,
+                                  OrcamentoAprovado, DataAprovacaoOrcamento, QuilometragemEntrada,
                                   DataCriacao, DataAtualizacao, Ativo, UsuarioCriacao, UsuarioAtualizacao)
-        VALUES (@Numero, @ClienteId, @VeiculoId, @DataAbertura, @DataPrevista, 
-                @DataConclusao, @StatusOrdem, @Descricao, @Observacoes, 
-                @ValorServicos, @ValorPecas, @ValorTotal, @Desconto, 
+        VALUES (@Numero, @ClienteId, @VeiculoId, @DataEntrada, @DataPrevisaoEntrega, @DataConclusao,
+                @ProblemaRelatado, @DiagnosticoTecnico, @ValorServicos, @ValorPecas, @ValorDesconto, @ValorTotal,
+                @Status, @ObservacoesInternas, @ObservacoesCliente, @MecanicoResponsavelId,
+                @OrcamentoAprovado, @DataAprovacaoOrcamento, @QuilometragemEntrada,
                 @DataCriacao, @DataAtualizacao, @Ativo, @UsuarioCriacao, @UsuarioAtualizacao);
         SELECT CAST(SCOPE_IDENTITY() as int);";
     
     protected override string UpdateQuery => @"
         UPDATE OrdensServico SET 
-            Numero = @Numero, ClienteId = @ClienteId, VeiculoId = @VeiculoId, 
-            DataAbertura = @DataAbertura, DataPrevista = @DataPrevista, 
-            DataConclusao = @DataConclusao, StatusOrdem = @StatusOrdem, 
-            Descricao = @Descricao, Observacoes = @Observacoes, 
-            ValorServicos = @ValorServicos, ValorPecas = @ValorPecas, 
-            ValorTotal = @ValorTotal, Desconto = @Desconto, 
-            DataAtualizacao = @DataAtualizacao, UsuarioAtualizacao = @UsuarioAtualizacao
+            Numero = @Numero, ClienteId = @ClienteId, VeiculoId = @VeiculoId, DataEntrada = @DataEntrada,
+            DataPrevisaoEntrega = @DataPrevisaoEntrega, DataConclusao = @DataConclusao,
+            ProblemaRelatado = @ProblemaRelatado, DiagnosticoTecnico = @DiagnosticoTecnico,
+            ValorServicos = @ValorServicos, ValorPecas = @ValorPecas, ValorDesconto = @ValorDesconto, ValorTotal = @ValorTotal,
+            Status = @Status, ObservacoesInternas = @ObservacoesInternas, ObservacoesCliente = @ObservacoesCliente,
+            MecanicoResponsavelId = @MecanicoResponsavelId, OrcamentoAprovado = @OrcamentoAprovado,
+            DataAprovacaoOrcamento = @DataAprovacaoOrcamento, QuilometragemEntrada = @QuilometragemEntrada,
+            DataAtualizacao = @DataAtualizacao, UsuarioAtualizacao = @UsuarioAtualizacao, Ativo = @Ativo
         WHERE Id = @Id";
 
     public OrdemServicoRepository(IDbConnectionFactory connectionFactory) : base(connectionFactory)
@@ -70,21 +73,22 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
     public async Task<IEnumerable<OrdemServico>> ObterPorClienteAsync(int clienteId)
     {
         using var connection = _connectionFactory.CreateConnection();
-        var query = BuildSelectQuery("ClienteId = @ClienteId AND Ativo = 1 ORDER BY DataAbertura DESC");
+        var query = BuildSelectQuery("ClienteId = @ClienteId AND Ativo = 1 ORDER BY DataEntrada DESC"); // DataAbertura -> DataEntrada
         return await connection.QueryAsync<OrdemServico>(query, new { ClienteId = clienteId });
     }
 
     public async Task<IEnumerable<OrdemServico>> ObterPorVeiculoAsync(int veiculoId)
     {
         using var connection = _connectionFactory.CreateConnection();
-        var query = BuildSelectQuery("VeiculoId = @VeiculoId AND Ativo = 1 ORDER BY DataAbertura DESC");
+        var query = BuildSelectQuery("VeiculoId = @VeiculoId AND Ativo = 1 ORDER BY DataEntrada DESC"); // DataAbertura -> DataEntrada
         return await connection.QueryAsync<OrdemServico>(query, new { VeiculoId = veiculoId });
     }
 
     public async Task<IEnumerable<OrdemServico>> ObterPorStatusAsync(StatusOrdemServico status)
     {
         using var connection = _connectionFactory.CreateConnection();
-        var query = BuildSelectQuery("StatusOrdem = @Status AND Ativo = 1 ORDER BY DataAbertura DESC");
+        // StatusOrdem -> Status
+        var query = BuildSelectQuery("Status = @Status AND Ativo = 1 ORDER BY DataEntrada DESC"); // DataAbertura -> DataEntrada
         return await connection.QueryAsync<OrdemServico>(query, new { Status = (int)status });
     }
 
@@ -92,21 +96,24 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = BuildSelectQuery(@"
-            DataAbertura >= @DataInicio AND DataAbertura <= @DataFim 
-            AND Ativo = 1 ORDER BY DataAbertura DESC");
+            DataEntrada >= @DataInicio AND DataEntrada <= @DataFim
+            AND Ativo = 1 ORDER BY DataEntrada DESC"); // DataAbertura -> DataEntrada
         return await connection.QueryAsync<OrdemServico>(query, new { DataInicio = dataInicio, DataFim = dataFim });
     }
 
-    public async Task<IEnumerable<OrdemServico>> ObterAbertasAsync()
+    public async Task<IEnumerable<OrdemServico>> ObterAbertasAsync() // Os status de "aberta" mudaram
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = BuildSelectQuery(@"
-            StatusOrdem IN (@Aberta, @EmAndamento) 
-            AND Ativo = 1 ORDER BY DataAbertura DESC");
+            Status IN (@Protocolo, @Orcamento, @Aprovado, @Execucao, @AguardandoPeca)
+            AND Ativo = 1 ORDER BY DataEntrada DESC"); // DataAbertura -> DataEntrada, StatusOrdem -> Status
         return await connection.QueryAsync<OrdemServico>(query, new 
         { 
-            Aberta = (int)StatusOrdemServico.Aberta, 
-            EmAndamento = (int)StatusOrdemServico.EmAndamento 
+            Protocolo = (int)StatusOrdemServico.Protocolo,
+            Orcamento = (int)StatusOrdemServico.Orcamento,
+            Aprovado = (int)StatusOrdemServico.Aprovado,
+            Execucao = (int)StatusOrdemServico.Execucao,
+            AguardandoPeca = (int)StatusOrdemServico.AguardandoPeca
         });
     }
 
@@ -114,55 +121,58 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = BuildSelectQuery(@"
-            StatusOrdem = @Concluida 
-            AND Ativo = 1 ORDER BY DataConclusao DESC");
-        return await connection.QueryAsync<OrdemServico>(query, new { Concluida = (int)StatusOrdemServico.Finalizada });
+            Status = @Finalizado
+            AND Ativo = 1 ORDER BY DataConclusao DESC"); // StatusOrdem -> Status
+        return await connection.QueryAsync<OrdemServico>(query, new { Finalizado = (int)StatusOrdemServico.Finalizado });
     }
 
     public async Task<IEnumerable<OrdemServico>> ObterCanceladasAsync()
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = BuildSelectQuery(@"
-            StatusOrdem = @Cancelada 
-            AND Ativo = 1 ORDER BY DataAbertura DESC");
-        return await connection.QueryAsync<OrdemServico>(query, new { Cancelada = (int)StatusOrdemServico.Cancelada });
+            Status = @Cancelado
+            AND Ativo = 1 ORDER BY DataEntrada DESC"); // StatusOrdem -> Status, DataAbertura -> DataEntrada
+        return await connection.QueryAsync<OrdemServico>(query, new { Cancelado = (int)StatusOrdemServico.Cancelado });
     }
 
     public async Task<IEnumerable<OrdemServico>> ObterVencidasAsync()
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = BuildSelectQuery(@"
-            DataPrevista < @DataAtual 
-            AND StatusOrdem IN (@Aberta, @EmAndamento) 
-            AND Ativo = 1 ORDER BY DataPrevista ASC");
+            DataPrevisaoEntrega < @DataAtual
+            AND Status IN (@Protocolo, @Orcamento, @Aprovado, @Execucao, @AguardandoPeca)
+            AND Ativo = 1 ORDER BY DataPrevisaoEntrega ASC"); // DataPrevista -> DataPrevisaoEntrega, StatusOrdem -> Status
         return await connection.QueryAsync<OrdemServico>(query, new 
         { 
             DataAtual = DateTime.Now.Date,
-            Aberta = (int)StatusOrdemServico.Aberta, 
-            EmAndamento = (int)StatusOrdemServico.EmAndamento 
+            Protocolo = (int)StatusOrdemServico.Protocolo,
+            Orcamento = (int)StatusOrdemServico.Orcamento,
+            Aprovado = (int)StatusOrdemServico.Aprovado,
+            Execucao = (int)StatusOrdemServico.Execucao,
+            AguardandoPeca = (int)StatusOrdemServico.AguardandoPeca
         });
     }
 
-    public async Task<decimal> ObterValorTotalPorPeriodoAsync(DateTime dataInicio, DateTime dataFim)
+    public async Task<decimal> ObterValorTotalPorPeriodoAsync(DateTime dataInicio, DateTime dataFim) // Usar DataConclusao para faturamento
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = @"
             SELECT ISNULL(SUM(ValorTotal), 0) 
             FROM OrdensServico 
-            WHERE DataAbertura >= @DataInicio AND DataAbertura <= @DataFim 
-            AND StatusOrdem = @Concluida AND Ativo = 1";
+            WHERE DataConclusao >= @DataInicio AND DataConclusao <= @DataFim
+            AND Status = @Finalizado AND Ativo = 1"; // DataAbertura -> DataConclusao, StatusOrdem -> Status
         return await connection.QuerySingleOrDefaultAsync<decimal>(query, new 
         { 
             DataInicio = dataInicio, 
             DataFim = dataFim, 
-            Concluida = (int)StatusOrdemServico.Finalizada 
+            Finalizado = (int)StatusOrdemServico.Finalizado
         });
     }
 
     public async Task<int> ContarPorStatusAsync(StatusOrdemServico status)
     {
         using var connection = _connectionFactory.CreateConnection();
-        var query = BuildCountQuery("StatusOrdem = @Status AND Ativo = 1");
+        var query = BuildCountQuery("Status = @Status AND Ativo = 1"); // StatusOrdem -> Status
         return await connection.QuerySingleAsync<int>(query, new { Status = (int)status });
     }
 
@@ -170,11 +180,14 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = BuildCountQuery(@"
-            StatusOrdem IN (@Aberta, @EmAndamento) AND Ativo = 1");
+            Status IN (@Protocolo, @Orcamento, @Aprovado, @Execucao, @AguardandoPeca) AND Ativo = 1"); // StatusOrdem -> Status
         return await connection.QuerySingleAsync<int>(query, new 
         { 
-            Aberta = (int)StatusOrdemServico.Aberta, 
-            EmAndamento = (int)StatusOrdemServico.EmAndamento 
+            Protocolo = (int)StatusOrdemServico.Protocolo,
+            Orcamento = (int)StatusOrdemServico.Orcamento,
+            Aprovado = (int)StatusOrdemServico.Aprovado,
+            Execucao = (int)StatusOrdemServico.Execucao,
+            AguardandoPeca = (int)StatusOrdemServico.AguardandoPeca
         });
     }
 
@@ -182,14 +195,17 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = BuildCountQuery(@"
-            DataPrevista < @DataAtual 
-            AND StatusOrdem IN (@Aberta, @EmAndamento) 
-            AND Ativo = 1");
+            DataPrevisaoEntrega < @DataAtual
+            AND Status IN (@Protocolo, @Orcamento, @Aprovado, @Execucao, @AguardandoPeca)
+            AND Ativo = 1"); // DataPrevista -> DataPrevisaoEntrega, StatusOrdem -> Status
         return await connection.QuerySingleAsync<int>(query, new 
         { 
             DataAtual = DateTime.Now.Date,
-            Aberta = (int)StatusOrdemServico.Aberta, 
-            EmAndamento = (int)StatusOrdemServico.EmAndamento 
+            Protocolo = (int)StatusOrdemServico.Protocolo,
+            Orcamento = (int)StatusOrdemServico.Orcamento,
+            Aprovado = (int)StatusOrdemServico.Aprovado,
+            Execucao = (int)StatusOrdemServico.Execucao,
+            AguardandoPeca = (int)StatusOrdemServico.AguardandoPeca
         });
     }
 
@@ -219,7 +235,7 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
         DateTime? dataFim = null,
         int pagina = 1,
         int tamanhoPagina = 10,
-        string ordenarPor = "DataAbertura",
+        string ordenarPor = "DataEntrada", // Interface já foi ajustada para DataEntrada
         bool ordenarDesc = true)
     {
         using var connection = _connectionFactory.CreateConnection();
@@ -247,19 +263,19 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
         
         if (status.HasValue)
         {
-            whereConditions.Add("StatusOrdem = @Status");
+            whereConditions.Add("Status = @Status"); // StatusOrdem -> Status
             parameters.Add("Status", (int)status.Value);
         }
         
         if (dataInicio.HasValue)
         {
-            whereConditions.Add("DataAbertura >= @DataInicio");
+            whereConditions.Add("DataEntrada >= @DataInicio"); // DataAbertura -> DataEntrada
             parameters.Add("DataInicio", dataInicio.Value);
         }
         
         if (dataFim.HasValue)
         {
-            whereConditions.Add("DataAbertura <= @DataFim");
+            whereConditions.Add("DataEntrada <= @DataFim"); // DataAbertura -> DataEntrada
             parameters.Add("DataFim", dataFim.Value);
         }
         
@@ -311,19 +327,19 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
         
         if (status.HasValue)
         {
-            whereConditions.Add("StatusOrdem = @Status");
+            whereConditions.Add("Status = @Status"); // StatusOrdem -> Status
             parameters.Add("Status", (int)status.Value);
         }
         
         if (dataInicio.HasValue)
         {
-            whereConditions.Add("DataAbertura >= @DataInicio");
+            whereConditions.Add("DataEntrada >= @DataInicio"); // DataAbertura -> DataEntrada
             parameters.Add("DataInicio", dataInicio.Value);
         }
         
         if (dataFim.HasValue)
         {
-            whereConditions.Add("DataAbertura <= @DataFim");
+            whereConditions.Add("DataEntrada <= @DataFim"); // DataAbertura -> DataEntrada
             parameters.Add("DataFim", dataFim.Value);
         }
         
@@ -342,6 +358,9 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
             LEFT JOIN Clientes c ON os.ClienteId = c.Id
             LEFT JOIN Veiculos v ON os.VeiculoId = v.Id
             WHERE os.Id = @Id AND os.Ativo = 1";
+        // O mapeamento de ClienteNome e VeiculoPlaca precisaria ser feito no DTO ou manualmente após a query,
+        // pois a entidade OrdemServico não possui essas propriedades diretamente.
+        // Por ora, a query retorna os campos, mas o Dapper não os mapeará para a entidade OrdemServico.
         return await connection.QueryFirstOrDefaultAsync<OrdemServico>(query, new { Id = id });
     }
 
@@ -349,13 +368,13 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
     {
         using var connection = _connectionFactory.CreateConnection();
         var query = @"
-            SELECT os.*, c.Nome as ClienteNome, v.Placa as VeiculoPlaca
+            SELECT os.*, c.NomeRazaoSocial as ClienteNome, v.Placa as VeiculoPlaca
             FROM OrdensServico os
             LEFT JOIN Clientes c ON os.ClienteId = c.Id
             LEFT JOIN Veiculos v ON os.VeiculoId = v.Id
             WHERE os.Ativo = 1
-            ORDER BY os.DataAbertura DESC";
-        return await connection.QueryAsync<OrdemServico>(query);
+            ORDER BY os.DataEntrada DESC"; // DataAbertura -> DataEntrada, c.Nome -> c.NomeRazaoSocial
+        return await connection.QueryAsync<OrdemServico>(query); // Similar ao acima, ClienteNome e VeiculoPlaca não serão mapeados para OrdemServico
     }
 
     public async Task<decimal> ObterFaturamentoPorPeriodoAsync(DateTime dataInicio, DateTime dataFim)
@@ -365,19 +384,19 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
             SELECT ISNULL(SUM(ValorTotal), 0) 
             FROM OrdensServico 
             WHERE DataConclusao >= @DataInicio AND DataConclusao <= @DataFim 
-            AND StatusOrdem = @Concluida AND Ativo = 1";
+            AND Status = @Finalizado AND Ativo = 1"; // StatusOrdem -> Status
         return await connection.QuerySingleOrDefaultAsync<decimal>(query, new 
         { 
             DataInicio = dataInicio, 
             DataFim = dataFim, 
-            Concluida = (int)StatusOrdemServico.Finalizada 
+            Finalizado = (int)StatusOrdemServico.Finalizado
         });
     }
 
     public async Task<int> ObterQuantidadePorStatusAsync(StatusOrdemServico status)
     {
         using var connection = _connectionFactory.CreateConnection();
-        var query = "SELECT COUNT(*) FROM OrdensServico WHERE StatusOrdem = @Status AND Ativo = 1";
+        var query = "SELECT COUNT(*) FROM OrdensServico WHERE Status = @Status AND Ativo = 1"; // StatusOrdem -> Status
         return await connection.QuerySingleAsync<int>(query, new { Status = (int)status });
     }
 
@@ -388,7 +407,7 @@ public class OrdemServicoRepository : BaseRepository<OrdemServico>, IOrdemServic
             SELECT TOP (@Quantidade) * 
             FROM OrdensServico 
             WHERE Ativo = 1 
-            ORDER BY DataAbertura DESC";
+            ORDER BY DataEntrada DESC"; // DataAbertura -> DataEntrada
         return await connection.QueryAsync<OrdemServico>(query, new { Quantidade = quantidade });
     }
 }

@@ -10,28 +10,32 @@ public class VeiculoRepository : BaseRepository<Veiculo>, IVeiculoRepository
     protected override string TableName => "Veiculos";
     
     protected override string InsertQuery => @"
-        INSERT INTO Veiculos (Placa, Marca, Modelo, Ano, Cor, Chassi, Renavam, 
-                             Combustivel, Observacoes, ClienteId, DataCriacao, DataAtualizacao, 
-                             Ativo, UsuarioCriacao)
-        VALUES (@Placa, @Marca, @Modelo, @Ano, @Cor, @Chassi, @Renavam, 
-                @Combustivel, @Observacoes, @ClienteId, @DataCriacao, @DataAtualizacao, 
-                @Ativo, @UsuarioCriacao);
+        INSERT INTO Veiculos (ClienteId, Placa, Marca, Modelo, AnoFabricacao, AnoModelo, Cor, Chassi,
+                             KmAtual, TipoCombustivel, Renavam, Foto, Observacoes,
+                             DataCriacao, DataAtualizacao, Ativo, UsuarioCriacao, UsuarioAtualizacao)
+        VALUES (@ClienteId, @Placa, @Marca, @Modelo, @AnoFabricacao, @AnoModelo, @Cor, @Chassi,
+                @KmAtual, @TipoCombustivel, @Renavam, @Foto, @Observacoes,
+                @DataCriacao, @DataAtualizacao, @Ativo, @UsuarioCriacao, @UsuarioAtualizacao);
         SELECT CAST(SCOPE_IDENTITY() as int);";
     
     protected override string UpdateQuery => @"
         UPDATE Veiculos 
-        SET Placa = @Placa, 
+        SET ClienteId = @ClienteId,
+            Placa = @Placa,
             Marca = @Marca,
             Modelo = @Modelo,
-            Ano = @Ano,
+            AnoFabricacao = @AnoFabricacao,
+            AnoModelo = @AnoModelo,
             Cor = @Cor,
             Chassi = @Chassi,
+            KmAtual = @KmAtual,
+            TipoCombustivel = @TipoCombustivel,
             Renavam = @Renavam,
-            Combustivel = @Combustivel,
+            Foto = @Foto,
             Observacoes = @Observacoes,
-            ClienteId = @ClienteId,
             DataAtualizacao = @DataAtualizacao, 
-            UsuarioAtualizacao = @UsuarioAtualizacao
+            UsuarioAtualizacao = @UsuarioAtualizacao,
+            Ativo = @Ativo
         WHERE Id = @Id";
 
     public VeiculoRepository(IDbConnectionFactory connectionFactory) : base(connectionFactory)
@@ -286,9 +290,9 @@ public class VeiculoRepository : BaseRepository<Veiculo>, IVeiculoRepository
             "placa" => "v.Placa",
             "marca" => "v.Marca",
             "modelo" => "v.Modelo",
-            "ano" => "v.Ano",
+            "anofabricacao" => "v.AnoFabricacao", // Ajustado de "ano"
             "cor" => "v.Cor",
-            "cliente" => "c.Nome",
+            "cliente" => "c.NomeRazaoSocial", // Ajustado para o nome correto do campo em Cliente
             "datacriacao" => "v.DataCriacao",
             "dataatualizacao" => "v.DataAtualizacao",
             _ => "v.Placa"

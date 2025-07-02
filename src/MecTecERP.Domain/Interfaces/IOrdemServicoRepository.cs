@@ -22,7 +22,7 @@ namespace MecTecERP.Domain.Interfaces
             DateTime? dataFim = null,
             int pagina = 1,
             int tamanhoPagina = 10,
-            string ordenarPor = "DataAbertura",
+            string ordenarPor = "DataEntrada", // Alterado de DataAbertura para DataEntrada
             bool ordenarDesc = true);
         Task<int> ContarPorFiltroAsync(
             string? numero = null,

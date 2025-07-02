@@ -1,5 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using MecTecERP.Infrastructure.Data;
+using MecTecERP.Infrastructure.Data; // Para IDbConnectionFactory, SqlServerConnectionFactory
+using MecTecERP.Application.Interfaces; // Para Services
+using MecTecERP.Application.Services;  // Para Services
+using MecTecERP.Domain.Interfaces;    // Para Repositories
+using MecTecERP.Infrastructure.Repositories; // Para Repositories
 using Blazored.Toast;
 using Blazored.Modal;
 using FluentValidation;
@@ -11,11 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-// Entity Framework
-builder.Services.AddDbContext<MecTecERPContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// AutoMapper
+// AutoMapper - AddApplication também registra AutoMapper, mas manter aqui não prejudica e garante que todos os assemblies sejam varridos.
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // FluentValidation
@@ -25,11 +24,14 @@ builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredModal();
 
-// Application Services
-// TODO: Adicionar serviços da aplicação quando criados
+using MecTecERP.Application; // Adicionado para AddApplication
+using MecTecERP.Infrastructure; // Adicionado para AddInfrastructure
 
-// Repository Services
-// TODO: Adicionar repositórios quando criados
+// Application Services
+builder.Services.AddApplication();
+
+// Infrastructure Services (inclui Repositories e DbConnectionFactory)
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -49,19 +51,7 @@ app.MapRazorPages();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-// Ensure database is created
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<MecTecERPContext>();
-    try
-    {
-        context.Database.EnsureCreated();
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Erro ao criar/conectar com o banco de dados");
-    }
-}
+// A criação do banco de dados e tabelas é feita por scripts SQL manuais com Dapper.
+// Não há EnsureCreated() automático.
 
 app.Run();

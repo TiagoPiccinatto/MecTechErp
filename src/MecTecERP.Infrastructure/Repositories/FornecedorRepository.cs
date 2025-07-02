@@ -10,32 +10,39 @@ public class FornecedorRepository : BaseRepository<Fornecedor>, IFornecedorRepos
     protected override string TableName => "Fornecedores";
     
     protected override string InsertQuery => @"
-        INSERT INTO Fornecedores (Nome, Cnpj, Email, Telefone, Endereco, Numero, 
-                                 Complemento, Bairro, Cidade, Estado, Cep, 
-                                 Observacoes, DataCriacao, DataAtualizacao, 
-                                 Ativo, UsuarioCriacao)
-        VALUES (@Nome, @Cnpj, @Email, @Telefone, @Endereco, @Numero, 
-                @Complemento, @Bairro, @Cidade, @Estado, @Cep, 
-                @Observacoes, @DataCriacao, @DataAtualizacao, 
-                @Ativo, @UsuarioCriacao);
+        INSERT INTO Fornecedores (RazaoSocial, NomeFantasia, Cnpj, InscricaoEstadual,
+                                 Telefone1, Telefone2, Email, Cep, Logradouro, Numero, Complemento, Bairro, Cidade, Uf,
+                                 NomeContato, TelefoneContato, EmailContato, Observacoes,
+                                 DataCriacao, DataAtualizacao, Ativo, UsuarioCriacao, UsuarioAtualizacao)
+        VALUES (@RazaoSocial, @NomeFantasia, @Cnpj, @InscricaoEstadual,
+                @Telefone1, @Telefone2, @Email, @Cep, @Logradouro, @Numero, @Complemento, @Bairro, @Cidade, @Uf,
+                @NomeContato, @TelefoneContato, @EmailContato, @Observacoes,
+                @DataCriacao, @DataAtualizacao, @Ativo, @UsuarioCriacao, @UsuarioAtualizacao);
         SELECT CAST(SCOPE_IDENTITY() as int);";
     
     protected override string UpdateQuery => @"
         UPDATE Fornecedores 
-        SET Nome = @Nome, 
+        SET RazaoSocial = @RazaoSocial,
+            NomeFantasia = @NomeFantasia,
             Cnpj = @Cnpj,
+            InscricaoEstadual = @InscricaoEstadual,
+            Telefone1 = @Telefone1,
+            Telefone2 = @Telefone2,
             Email = @Email,
-            Telefone = @Telefone,
-            Endereco = @Endereco,
+            Cep = @Cep,
+            Logradouro = @Logradouro,
             Numero = @Numero,
             Complemento = @Complemento,
             Bairro = @Bairro,
             Cidade = @Cidade,
-            Estado = @Estado,
-            Cep = @Cep,
+            Uf = @Uf,
+            NomeContato = @NomeContato,
+            TelefoneContato = @TelefoneContato,
+            EmailContato = @EmailContato,
             Observacoes = @Observacoes,
             DataAtualizacao = @DataAtualizacao, 
-            UsuarioAtualizacao = @UsuarioAtualizacao
+            UsuarioAtualizacao = @UsuarioAtualizacao,
+            Ativo = @Ativo
         WHERE Id = @Id";
 
     public FornecedorRepository(IDbConnectionFactory connectionFactory) : base(connectionFactory)
@@ -106,9 +113,9 @@ public class FornecedorRepository : BaseRepository<Fornecedor>, IFornecedorRepos
         var whereConditions = new List<string> { "1=1" };
         var parameters = new DynamicParameters();
 
-        if (!string.IsNullOrWhiteSpace(nome))
+        if (!string.IsNullOrWhiteSpace(nome)) // nome pode ser RazaoSocial ou NomeFantasia
         {
-            whereConditions.Add("Nome LIKE @Nome");
+            whereConditions.Add("(RazaoSocial LIKE @Nome OR NomeFantasia LIKE @Nome)");
             parameters.Add("Nome", $"%{nome}%");
         }
 
@@ -130,10 +137,10 @@ public class FornecedorRepository : BaseRepository<Fornecedor>, IFornecedorRepos
             parameters.Add("Cidade", $"%{cidade}%");
         }
 
-        if (!string.IsNullOrWhiteSpace(estado))
+        if (!string.IsNullOrWhiteSpace(estado)) // estado agora é Uf
         {
-            whereConditions.Add("Estado LIKE @Estado");
-            parameters.Add("Estado", $"%{estado}%");
+            whereConditions.Add("Uf LIKE @Uf");
+            parameters.Add("Uf", $"%{estado}%"); // Mantendo parametro 'estado' por compatibilidade da interface, mas usando Uf
         }
 
         if (ativo.HasValue)
@@ -145,14 +152,15 @@ public class FornecedorRepository : BaseRepository<Fornecedor>, IFornecedorRepos
         var orderDirection = ordenarDesc ? "DESC" : "ASC";
         var orderColumn = ordenarPor.ToLower() switch
         {
-            "nome" => "Nome",
+            "razaosocial" => "RazaoSocial", // Ajustado
+            "nome" => "RazaoSocial", // Alias
             "cnpj" => "Cnpj",
             "email" => "Email",
             "cidade" => "Cidade",
-            "estado" => "Estado",
+            "uf" => "Uf", // Ajustado de "estado"
             "datacriacao" => "DataCriacao",
             "ativo" => "Ativo",
-            _ => "Nome"
+            _ => "RazaoSocial" // Ajustado Default
         };
 
         var offset = (pagina - 1) * tamanhoPagina;
@@ -182,9 +190,9 @@ public class FornecedorRepository : BaseRepository<Fornecedor>, IFornecedorRepos
         var whereConditions = new List<string> { "1=1" };
         var parameters = new DynamicParameters();
 
-        if (!string.IsNullOrWhiteSpace(nome))
+        if (!string.IsNullOrWhiteSpace(nome)) // nome pode ser RazaoSocial ou NomeFantasia
         {
-            whereConditions.Add("Nome LIKE @Nome");
+            whereConditions.Add("(RazaoSocial LIKE @Nome OR NomeFantasia LIKE @Nome)");
             parameters.Add("Nome", $"%{nome}%");
         }
 
@@ -206,10 +214,10 @@ public class FornecedorRepository : BaseRepository<Fornecedor>, IFornecedorRepos
             parameters.Add("Cidade", $"%{cidade}%");
         }
 
-        if (!string.IsNullOrWhiteSpace(estado))
+        if (!string.IsNullOrWhiteSpace(estado)) // estado agora é Uf
         {
-            whereConditions.Add("Estado LIKE @Estado");
-            parameters.Add("Estado", $"%{estado}%");
+            whereConditions.Add("Uf LIKE @Uf");
+            parameters.Add("Uf", $"%{estado}%"); // Mantendo parametro 'estado' por compatibilidade da interface, mas usando Uf
         }
 
         if (ativo.HasValue)
@@ -228,7 +236,15 @@ public class FornecedorRepository : BaseRepository<Fornecedor>, IFornecedorRepos
     public async Task<IEnumerable<Fornecedor>> ObterParaSelectAsync()
     {
         using var connection = _connectionFactory.CreateConnection();
-        var sql = "SELECT Id, Nome FROM Fornecedores WHERE Ativo = 1 ORDER BY Nome";
+        var sql = "SELECT Id, Nome FROM Fornecedores WHERE Ativo = 1 ORDER BY Nome"; // Deveria ser RazaoSocial ou NomeFantasia
         return await connection.QueryAsync<Fornecedor>(sql);
+    }
+
+    public async Task<bool> PossuiProdutosAsync(int fornecedorId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var sql = "SELECT COUNT(1) FROM Produtos WHERE FornecedorId = @FornecedorId AND Ativo = 1";
+        var count = await connection.QuerySingleAsync<int>(sql, new { FornecedorId = fornecedorId });
+        return count > 0;
     }
 }

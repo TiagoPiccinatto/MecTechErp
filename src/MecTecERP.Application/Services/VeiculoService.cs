@@ -53,101 +53,32 @@ namespace MecTecERP.Application.Services
         {
             try
             {
-                var veiculos = await _veiculoRepository.ObterTodosComClienteAsync();
+                // Usar o método do repositório que aplica filtros e paginação no banco
+                var veiculos = await _veiculoRepository.ObterPorFiltroAsync(
+                    filtro.Placa,
+                    filtro.Modelo,
+                    filtro.Marca,
+                    filtro.ClienteId,
+                    filtro.Ativo,
+                    filtro.Pagina,
+                    filtro.ItensPorPagina,
+                    filtro.OrdenarPor, // Repositório já trata "ano" -> "anofabricacao", "cliente" -> "c.NomeRazaoSocial"
+                    filtro.OrdemDecrescente);
                 
-                // Aplicar filtros
-                if (!string.IsNullOrEmpty(filtro.Busca))
-                {
-                    veiculos = veiculos.Where(v => 
-                        v.Placa.Contains(filtro.Busca, StringComparison.OrdinalIgnoreCase) ||
-                        v.Modelo.Contains(filtro.Busca, StringComparison.OrdinalIgnoreCase) ||
-                        v.Marca.Contains(filtro.Busca, StringComparison.OrdinalIgnoreCase) ||
-                        (v.Cliente != null && v.Cliente.Nome.Contains(filtro.Busca, StringComparison.OrdinalIgnoreCase)));
-                }
+                var totalItens = await _veiculoRepository.ContarPorFiltroAsync(
+                    filtro.Placa,
+                    filtro.Modelo,
+                    filtro.Marca,
+                    filtro.ClienteId,
+                    filtro.Ativo);
 
-                if (filtro.ClienteId.HasValue)
-                {
-                    veiculos = veiculos.Where(v => v.ClienteId == filtro.ClienteId.Value);
-                }
-
-                if (!string.IsNullOrEmpty(filtro.Placa))
-                {
-                    veiculos = veiculos.Where(v => v.Placa.Contains(filtro.Placa, StringComparison.OrdinalIgnoreCase));
-                }
-
-                if (!string.IsNullOrEmpty(filtro.Marca))
-                {
-                    veiculos = veiculos.Where(v => v.Marca.Contains(filtro.Marca, StringComparison.OrdinalIgnoreCase));
-                }
-
-                if (!string.IsNullOrEmpty(filtro.Modelo))
-                {
-                    veiculos = veiculos.Where(v => v.Modelo.Contains(filtro.Modelo, StringComparison.OrdinalIgnoreCase));
-                }
-
-                if (filtro.AnoInicio.HasValue)
-                {
-                    veiculos = veiculos.Where(v => v.Ano >= filtro.AnoInicio.Value);
-                }
-
-                if (filtro.AnoFim.HasValue)
-                {
-                    veiculos = veiculos.Where(v => v.Ano <= filtro.AnoFim.Value);
-                }
-
-                if (filtro.Ativo.HasValue)
-                {
-                    veiculos = veiculos.Where(v => v.Ativo == filtro.Ativo.Value);
-                }
-
-                var totalItens = veiculos.Count();
+                var veiculosDto = _mapper.Map<List<VeiculoListDto>>(veiculos);
                 
-                // Ordenação
-                if (!string.IsNullOrEmpty(filtro.OrdenarPor))
-                {
-                    switch (filtro.OrdenarPor.ToLower())
-                    {
-                        case "placa":
-                            veiculos = veiculos.OrderBy(v => v.Placa);
-                            break;
-                        case "marca":
-                            veiculos = veiculos.OrderBy(v => v.Marca);
-                            break;
-                        case "modelo":
-                            veiculos = veiculos.OrderBy(v => v.Modelo);
-                            break;
-                        case "ano":
-                            veiculos = veiculos.OrderBy(v => v.Ano);
-                            break;
-                        case "cliente":
-                            veiculos = veiculos.OrderBy(v => v.Cliente?.Nome);
-                            break;
-                        default:
-                            veiculos = veiculos.OrderBy(v => v.Id);
-                            break;
-                    }
-                }
-                else
-                {
-                    veiculos = veiculos.OrderBy(v => v.Id);
-                }
+                // O VeiculoListDto precisa ter AnoFabricacao e AnoModelo se quisermos exibi-los.
+                // O filtro no DTO usa AnoFabricacaoInicio e AnoFabricacaoFim.
+                // O repositório foi ajustado para ordenar por 'anofabricacao'.
 
-                // Paginação
-                var veiculosPaginados = veiculos
-                    .Skip((filtro.Pagina - 1) * filtro.ItensPorPagina)
-                    .Take(filtro.ItensPorPagina)
-                    .ToList();
-
-                var veiculosDto = _mapper.Map<List<VeiculoListDto>>(veiculosPaginados);
-
-                var paginacao = new PaginacaoDto<VeiculoListDto>
-                {
-                    Itens = veiculosDto,
-                    TotalItens = totalItens,
-                    Pagina = filtro.Pagina,
-                    ItensPorPagina = filtro.ItensPorPagina,
-                    TotalPaginas = (int)Math.Ceiling((double)totalItens / filtro.ItensPorPagina)
-                };
+                var paginacao = new PaginacaoDto<VeiculoListDto>(veiculosDto, totalItens, filtro.Pagina, filtro.ItensPorPagina);
 
                 return RespostaDto<PaginacaoDto<VeiculoListDto>>.Sucesso(paginacao);
             }
@@ -177,13 +108,14 @@ namespace MecTecERP.Application.Services
                 }
 
                 var veiculo = _mapper.Map<Veiculo>(veiculoCreateDto);
-                veiculo.DataCadastro = DateTime.Now;
-                veiculo.Ativo = true;
+                // DataCriacao e Ativo são definidos pelo BaseRepository.AdicionarAsync
+                // veiculo.DataCadastro = DateTime.Now; // Removido
+                // veiculo.Ativo = true; // Removido
 
-                await _veiculoRepository.AdicionarAsync(veiculo);
-                await _veiculoRepository.SalvarAsync();
+                var veiculoAdicionado = await _veiculoRepository.AdicionarAsync(veiculo);
+                // await _veiculoRepository.SalvarAsync(); // Removido - Dapper executa imediatamente
 
-                var veiculoDto = _mapper.Map<VeiculoDto>(veiculo);
+                var veiculoDto = _mapper.Map<VeiculoDto>(veiculoAdicionado);
                 return RespostaDto<VeiculoDto>.Sucesso(veiculoDto, "Veículo criado com sucesso");
             }
             catch (Exception ex)
@@ -218,12 +150,13 @@ namespace MecTecERP.Application.Services
                 }
 
                 _mapper.Map(veiculoUpdateDto, veiculo);
-                veiculo.DataAtualizacao = DateTime.Now;
+                // DataAtualizacao é definido pelo BaseRepository.AtualizarAsync
+                // veiculo.DataAtualizacao = DateTime.Now; // Removido
 
-                _veiculoRepository.Atualizar(veiculo);
-                await _veiculoRepository.SalvarAsync();
+                await _veiculoRepository.AtualizarAsync(veiculo); // Usar AtualizarAsync
+                // await _veiculoRepository.SalvarAsync(); // Removido
 
-                var veiculoDto = _mapper.Map<VeiculoDto>(veiculo);
+                var veiculoDto = _mapper.Map<VeiculoDto>(veiculo); // Mapear após AtualizarAsync pode ser útil se AtualizarAsync modificar a entidade
                 return RespostaDto<VeiculoDto>.Sucesso(veiculoDto, "Veículo atualizado com sucesso");
             }
             catch (Exception ex)
@@ -250,8 +183,8 @@ namespace MecTecERP.Application.Services
                     return RespostaDto<bool>.Erro("Não é possível excluir o veículo pois existem ordens de serviço vinculadas");
                 }
 
-                _veiculoRepository.Remover(veiculo);
-                await _veiculoRepository.SalvarAsync();
+                await _veiculoRepository.RemoverAsync(id); // Usar RemoverAsync(id)
+                // await _veiculoRepository.SalvarAsync(); // Removido
 
                 return RespostaDto<bool>.Sucesso(true, "Veículo excluído com sucesso");
             }
@@ -290,7 +223,7 @@ namespace MecTecERP.Application.Services
                     .Select(v => new SelectItemDto
                     {
                         Value = v.Id.ToString(),
-                        Text = $"{v.Placa} - {v.Marca} {v.Modelo} ({v.Cliente?.Nome})"
+                        Text = $"{v.Placa} - {v.Marca} {v.Modelo} ({v.Cliente?.NomeRazaoSocial})" // Ajustado para NomeRazaoSocial
                     })
                     .OrderBy(x => x.Text)
                     .ToList();

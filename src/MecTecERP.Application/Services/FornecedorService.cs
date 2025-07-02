@@ -29,19 +29,22 @@ public class FornecedorService : IFornecedorService
         {
             _logger.LogInformation("Obtendo fornecedores com filtros: {@Filtro}", filtro);
 
-            var fornecedores = await _fornecedorRepository.ObterTodosAsync(
-                filtro.Nome,
+            // Usar ObterPorFiltroAsync do repositório
+            // Assumindo que FiltroBaseDto tem Nome, Cnpj, Email, Cidade, Estado (Uf), Ativo
+            // O repositório já foi ajustado para tratar Nome como RazaoSocial/NomeFantasia e Estado como Uf.
+            var fornecedores = await _fornecedorRepository.ObterPorFiltroAsync(
+                filtro.Nome, // Será tratado como RazaoSocial ou NomeFantasia no repo
                 filtro.Cnpj,
                 filtro.Email,
                 filtro.Cidade,
-                filtro.Estado,
+                filtro.Estado, // Será tratado como Uf no repo
                 filtro.Ativo,
                 filtro.Pagina,
                 filtro.ItensPorPagina,
-                filtro.OrdenarPor,
+                filtro.OrdenarPor, // Repo trata "nome" -> "RazaoSocial", "estado" -> "Uf"
                 filtro.OrdemDecrescente);
 
-            var total = await _fornecedorRepository.ContarAsync(
+            var total = await _fornecedorRepository.ContarPorFiltroAsync(
                 filtro.Nome,
                 filtro.Cnpj,
                 filtro.Email,
@@ -119,8 +122,8 @@ public class FornecedorService : IFornecedorService
             var selectItems = fornecedores.Select(f => new SelectItemDto
             {
                 Value = f.Id.ToString(),
-                Text = f.Nome
-            }).ToList();
+                Text = !string.IsNullOrEmpty(f.NomeFantasia) ? f.NomeFantasia : f.RazaoSocial // Usar NomeFantasia se disponível, senão RazaoSocial
+            }).OrderBy(s => s.Text).ToList();
 
             return RespostaDto<List<SelectItemDto>>.Sucesso(selectItems);
         }
@@ -151,14 +154,15 @@ public class FornecedorService : IFornecedorService
             }
 
             var fornecedor = _mapper.Map<Fornecedor>(fornecedorDto);
-            fornecedor.DataCriacao = DateTime.Now;
-            fornecedor.Ativo = true;
+            // DataCriacao e Ativo são definidos pelo BaseRepository.AdicionarAsync
+            // fornecedor.DataCriacao = DateTime.Now; // Removido
+            // fornecedor.Ativo = true; // Removido
 
             var fornecedorCriado = await _fornecedorRepository.AdicionarAsync(fornecedor);
             
             _logger.LogInformation("Fornecedor criado com sucesso. ID: {Id}", fornecedorCriado.Id);
             
-            var resultado = _mapper.Map<FornecedorDto>(fornecedorCriado);
+            var resultado = _mapper.Map<FornecedorDto>(fornecedorCriado); // Mapear a entidade retornada
             return RespostaDto<FornecedorDto>.Sucesso(resultado);
         }
         catch (Exception ex)
@@ -194,13 +198,14 @@ public class FornecedorService : IFornecedorService
             }
 
             _mapper.Map(fornecedorDto, fornecedor);
-            fornecedor.DataAtualizacao = DateTime.Now;
+            // DataAtualizacao é definida pelo BaseRepository.AtualizarAsync
+            // fornecedor.DataAtualizacao = DateTime.Now; // Removido
 
-            var fornecedorAtualizado = await _fornecedorRepository.AtualizarAsync(fornecedor);
+            await _fornecedorRepository.AtualizarAsync(fornecedor); // AtualizarAsync é void
             
-            _logger.LogInformation("Fornecedor atualizado com sucesso. ID: {Id}", fornecedorAtualizado.Id);
+            _logger.LogInformation("Fornecedor atualizado com sucesso. ID: {Id}", fornecedor.Id); // Usar fornecedor.Id
             
-            var resultado = _mapper.Map<FornecedorDto>(fornecedorAtualizado);
+            var resultado = _mapper.Map<FornecedorDto>(fornecedor); // Mapear a instância 'fornecedor'
             return RespostaDto<FornecedorDto>.Sucesso(resultado);
         }
         catch (Exception ex)
@@ -223,20 +228,15 @@ public class FornecedorService : IFornecedorService
             }
 
             // Verificar se o fornecedor possui produtos associados
-            if (await _fornecedorRepository.PossuiProdutosAsync(id))
+            if (await _fornecedorRepository.PossuiProdutosAsync(id)) // Agora este método existe na interface e repo
             {
-                return RespostaDto.Erro("Não é possível excluir o fornecedor pois ele possui produtos associados");
+                return RespostaDto.Erro("Não é possível excluir o fornecedor pois ele possui produtos associados. Considere inativá-lo.");
             }
 
-            var resultado = await _fornecedorRepository.ExcluirAsync(id);
+            await _fornecedorRepository.RemoverAsync(id); // Usar RemoverAsync que é padrão do IRepository
             
-            if (resultado)
-            {
-                _logger.LogInformation("Fornecedor excluído com sucesso. ID: {Id}", id);
-                return RespostaDto.Sucesso("Fornecedor excluído com sucesso");
-            }
-            
-            return RespostaDto.Erro("Falha ao excluir fornecedor");
+            _logger.LogInformation("Fornecedor excluído com sucesso. ID: {Id}", id);
+            return RespostaDto.Sucesso("Fornecedor excluído com sucesso");
         }
         catch (Exception ex)
         {
@@ -258,7 +258,8 @@ public class FornecedorService : IFornecedorService
             }
 
             fornecedor.Ativo = !fornecedor.Ativo;
-            fornecedor.DataAtualizacao = DateTime.Now;
+            // DataAtualizacao é tratada pelo BaseRepository.AtualizarAsync
+            // fornecedor.DataAtualizacao = DateTime.Now; // Removido
 
             await _fornecedorRepository.AtualizarAsync(fornecedor);
             
@@ -278,8 +279,8 @@ public class FornecedorService : IFornecedorService
     {
         try
         {
-            var existe = await _fornecedorRepository.ExisteAsync(id);
-            return RespostaDto<bool>.Sucesso(existe);
+            var fornecedor = await _fornecedorRepository.ObterPorIdAsync(id); // Ajustado para usar ObterPorIdAsync
+            return RespostaDto<bool>.Sucesso(fornecedor != null);
         }
         catch (Exception ex)
         {

@@ -10,29 +10,34 @@ public class ClienteRepository : BaseRepository<Cliente>, IClienteRepository
     protected override string TableName => "Clientes";
     
     protected override string InsertQuery => @"
-        INSERT INTO Clientes (Nome, CpfCnpj, Email, Telefone, Endereco, Cidade, Estado, Cep, 
-                             DataNascimento, TipoCliente, Observacoes, DataCriacao, DataAtualizacao, 
-                             Ativo, UsuarioCriacao)
-        VALUES (@Nome, @CpfCnpj, @Email, @Telefone, @Endereco, @Cidade, @Estado, @Cep, 
-                @DataNascimento, @TipoCliente, @Observacoes, @DataCriacao, @DataAtualizacao, 
-                @Ativo, @UsuarioCriacao);
+        INSERT INTO Clientes (TipoPessoa, NomeRazaoSocial, CpfCnpj, RgIe, Telefone1, Telefone2, Email,
+                             Cep, Logradouro, Numero, Complemento, Bairro, Cidade, Uf, Observacoes,
+                             DataCriacao, DataAtualizacao, Ativo, UsuarioCriacao, UsuarioAtualizacao)
+        VALUES (@TipoPessoa, @NomeRazaoSocial, @CpfCnpj, @RgIe, @Telefone1, @Telefone2, @Email,
+                @Cep, @Logradouro, @Numero, @Complemento, @Bairro, @Cidade, @Uf, @Observacoes,
+                @DataCriacao, @DataAtualizacao, @Ativo, @UsuarioCriacao, @UsuarioAtualizacao);
         SELECT CAST(SCOPE_IDENTITY() as int);";
     
     protected override string UpdateQuery => @"
         UPDATE Clientes 
-        SET Nome = @Nome, 
+        SET TipoPessoa = @TipoPessoa,
+            NomeRazaoSocial = @NomeRazaoSocial,
             CpfCnpj = @CpfCnpj,
+            RgIe = @RgIe,
+            Telefone1 = @Telefone1,
+            Telefone2 = @Telefone2,
             Email = @Email,
-            Telefone = @Telefone,
-            Endereco = @Endereco,
-            Cidade = @Cidade,
-            Estado = @Estado,
             Cep = @Cep,
-            DataNascimento = @DataNascimento,
-            TipoCliente = @TipoCliente,
+            Logradouro = @Logradouro,
+            Numero = @Numero,
+            Complemento = @Complemento,
+            Bairro = @Bairro,
+            Cidade = @Cidade,
+            Uf = @Uf,
             Observacoes = @Observacoes,
             DataAtualizacao = @DataAtualizacao, 
-            UsuarioAtualizacao = @UsuarioAtualizacao
+            UsuarioAtualizacao = @UsuarioAtualizacao,
+            Ativo = @Ativo
         WHERE Id = @Id";
 
     public ClienteRepository(IDbConnectionFactory connectionFactory) : base(connectionFactory)
@@ -115,10 +120,10 @@ public class ClienteRepository : BaseRepository<Cliente>, IClienteRepository
         var whereConditions = new List<string> { "1=1" };
         var parameters = new DynamicParameters();
 
-        if (!string.IsNullOrWhiteSpace(nome))
+        if (!string.IsNullOrWhiteSpace(nome)) // nome aqui se refere a NomeRazaoSocial
         {
-            whereConditions.Add("Nome LIKE @Nome");
-            parameters.Add("Nome", $"%{nome}%");
+            whereConditions.Add("NomeRazaoSocial LIKE @NomeRazaoSocial");
+            parameters.Add("NomeRazaoSocial", $"%{nome}%");
         }
 
         if (!string.IsNullOrWhiteSpace(cpfCnpj))
@@ -133,9 +138,9 @@ public class ClienteRepository : BaseRepository<Cliente>, IClienteRepository
             parameters.Add("Email", $"%{email}%");
         }
 
-        if (!string.IsNullOrWhiteSpace(telefone))
+        if (!string.IsNullOrWhiteSpace(telefone)) // telefone aqui pode ser Telefone1 ou Telefone2
         {
-            whereConditions.Add("Telefone LIKE @Telefone");
+            whereConditions.Add("(Telefone1 LIKE @Telefone OR Telefone2 LIKE @Telefone)");
             parameters.Add("Telefone", $"%{telefone}%");
         }
 
@@ -154,14 +159,15 @@ public class ClienteRepository : BaseRepository<Cliente>, IClienteRepository
         var orderDirection = ordenarDesc ? "DESC" : "ASC";
         var orderColumn = ordenarPor.ToLower() switch
         {
-            "nome" => "Nome",
+            "nomerazaosocial" => "NomeRazaoSocial", // Ajustado
+            "nome" => "NomeRazaoSocial", // Alias para compatibilidade
             "cpfcnpj" => "CpfCnpj",
             "email" => "Email",
             "cidade" => "Cidade",
-            "estado" => "Estado",
+            "uf" => "Uf", // Ajustado de "estado"
             "datacriacao" => "DataCriacao",
             "dataatualizacao" => "DataAtualizacao",
-            _ => "Nome"
+            _ => "NomeRazaoSocial" // Ajustado Default
         };
 
         var offset = (pagina - 1) * tamanhoPagina;
@@ -191,10 +197,10 @@ public class ClienteRepository : BaseRepository<Cliente>, IClienteRepository
         var whereConditions = new List<string> { "1=1" };
         var parameters = new DynamicParameters();
 
-        if (!string.IsNullOrWhiteSpace(nome))
+        if (!string.IsNullOrWhiteSpace(nome)) // nome aqui se refere a NomeRazaoSocial
         {
-            whereConditions.Add("Nome LIKE @Nome");
-            parameters.Add("Nome", $"%{nome}%");
+            whereConditions.Add("NomeRazaoSocial LIKE @NomeRazaoSocial");
+            parameters.Add("NomeRazaoSocial", $"%{nome}%");
         }
 
         if (!string.IsNullOrWhiteSpace(cpfCnpj))
@@ -209,9 +215,9 @@ public class ClienteRepository : BaseRepository<Cliente>, IClienteRepository
             parameters.Add("Email", $"%{email}%");
         }
 
-        if (!string.IsNullOrWhiteSpace(telefone))
+        if (!string.IsNullOrWhiteSpace(telefone)) // telefone aqui pode ser Telefone1 ou Telefone2
         {
-            whereConditions.Add("Telefone LIKE @Telefone");
+            whereConditions.Add("(Telefone1 LIKE @Telefone OR Telefone2 LIKE @Telefone)");
             parameters.Add("Telefone", $"%{telefone}%");
         }
 

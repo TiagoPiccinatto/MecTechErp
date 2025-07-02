@@ -18,5 +18,6 @@ namespace MecTecERP.Domain.Interfaces
             string? nome = null,
             bool? ativa = null);
         Task<IEnumerable<Categoria>> ObterParaSelectAsync();
+        Task<bool> PossuiProdutosAsync(int categoriaId); // Adicionado
     }
 }

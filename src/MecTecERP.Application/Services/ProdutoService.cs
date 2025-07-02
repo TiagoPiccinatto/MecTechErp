@@ -36,27 +36,34 @@ public class ProdutoService : IProdutoService
         {
             _logger.LogInformation("Obtendo produtos com filtros: {@Filtro}", filtro);
 
-            var produtos = await _produtoRepository.ObterTodosAsync(
-                null, // Nome
-                null, // Codigo
-                null, // CodigoBarras
-                null, // CategoriaId
-                null, // FornecedorId
-                null, // StatusEstoque
-                null, // Ativo
+            // Assumindo que FiltroBaseDto pode ter Nome e Ativo, ou que deveríamos usar um ProdutoFiltroDto.
+            // Por ora, adaptando para o que IProdutoRepository.ObterPorFiltroAsync espera.
+            // Se FiltroBaseDto não tiver Nome, Codigo, etc., eles serão null.
+            var produtos = await _produtoRepository.ObterPorFiltroAsync(
+                filtro.Nome, // Supondo que FiltroBaseDto tenha Nome (ou é um ProdutoFiltroDto)
+                null, // Codigo - não presente em FiltroBaseDto padrão
+                null, // CodigoBarras - não presente em FiltroBaseDto padrão
+                null, // CategoriaId - não presente em FiltroBaseDto padrão
+                null, // FornecedorId - não presente em FiltroBaseDto padrão
+                null, // precoVendaMin - não presente em FiltroBaseDto padrão
+                null, // precoVendaMax - não presente em FiltroBaseDto padrão
+                null, // statusEstoque - não presente em FiltroBaseDto padrão
+                filtro.Ativo, // Supondo que FiltroBaseDto tenha Ativo
                 filtro.Pagina,
                 filtro.ItensPorPagina,
                 filtro.OrdenarPor,
                 filtro.OrdemDecrescente);
 
-            var total = await _produtoRepository.ContarAsync(
-                null, // Nome
+            var total = await _produtoRepository.ContarPorFiltroAsync(
+                filtro.Nome,
                 null, // Codigo
                 null, // CodigoBarras
                 null, // CategoriaId
                 null, // FornecedorId
-                null, // StatusEstoque
-                null); // Ativo
+                null, // precoVendaMin
+                null, // precoVendaMax
+                null, // statusEstoque
+                filtro.Ativo);
 
             var produtosDto = _mapper.Map<List<ProdutoListDto>>(produtos);
 
@@ -104,13 +111,18 @@ public class ProdutoService : IProdutoService
         {
             _logger.LogInformation("Obtendo produto por código: {Codigo}", codigo);
 
-            var produto = await _produtoRepository.ObterPorCodigoAsync(codigo);
-            return produto != null ? _mapper.Map<ProdutoDto>(produto) : null;
+            var produto = await _produtoRepository.ObterPorCodigoAsync(codigo); // IProdutoRepository não tem ObterPorCodigoAsync. Assumindo que deveria ser ObterPorFiltroAsync ou um novo método.
+                                                                            // O repo existente tem um método ObterPorCodigoAsync, mas não está na interface IProdutoRepository que listamos.
+                                                                            // Vou assumir que o método existe na implementação de _produtoRepository.
+            if (produto == null)
+                return RespostaDto<ProdutoDto>.Erro($"Produto com código {codigo} não encontrado");
+
+            return RespostaDto<ProdutoDto>.Sucesso(_mapper.Map<ProdutoDto>(produto));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao obter produto por código: {Codigo}", codigo);
-            throw;
+            return RespostaDto<ProdutoDto>.Erro("Erro interno do servidor");
         }
     }
 
